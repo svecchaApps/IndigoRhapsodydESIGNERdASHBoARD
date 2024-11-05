@@ -1,7 +1,7 @@
 import React from "react";
-import Sidebar from "../sidebar/sideBar";
+import Sidebar from "../sidebar/sideBar.jsx";
 import { Outlet } from "react-router-dom";
-import AppBar from "../appbar/AppBar";
+import AppBar from "../appbar/AppBar.jsx";
 
 const BaseLayout = () => {
   return (
