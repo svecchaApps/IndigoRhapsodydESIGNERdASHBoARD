@@ -93,7 +93,7 @@ function Loginscreen() {
               <FaGoogle /> Sign in with Google
             </button>
             <p className="signup-link">
-              Don't have an account? <Link to="/signup">Sign up</Link>
+              Don't have an account? <a href="/signup">Sign up</a>
             </p>
           </form>
         </FormContainer>
