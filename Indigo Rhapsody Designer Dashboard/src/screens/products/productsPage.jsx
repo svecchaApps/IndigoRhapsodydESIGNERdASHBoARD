@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { RecentOrderWrap } from "./productsPage.styles";
 import ProductsTable from "../../components/products/productsTable";
 import AddProductModal from "../../components/addProduct/addProductModal";
+import AddSubCategoryModal from "./addSubCategory"; // Import the modal
 import styled from "styled-components";
 import UploadBulkModal from "../../components/addProductBulk/addProductBulModal";
+import EditVariantModal from "../../components/addProductBulk/editProductBulkModal"; // Import the EditVariantModal
 
 const HeaderRow = styled.div`
   display: flex;
@@ -21,13 +23,10 @@ const HeaderRow = styled.div`
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
-
       &.add-product {
         background-color: ${(props) => props.theme.colors.blue};
-
         color: #fff;
       }
-
       &.upload-bulk {
         background-color: ${(props) => props.theme.colors.blue};
         color: #fff;
@@ -45,8 +44,9 @@ const SearchBar = styled.input`
 
 function ProductsPage() {
   const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [showAddSubCategoryModal, setShowAddSubCategoryModal] = useState(false);
   const [showUploadBulkModal, setShowUploadBulkModal] = useState(false);
-  // const [filteredProducts, setFilteredProducts] = useState([]);
+  const [showEditVariantModal, setShowEditVariantModal] = useState(false); // State for EditVariantModal
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleAddProductClick = () => {
@@ -57,6 +57,14 @@ function ProductsPage() {
     setShowAddProductModal(false);
   };
 
+  const handleAddSubCategoryClick = () => {
+    setShowAddSubCategoryModal(true);
+  };
+
+  const closeAddSubCategoryModal = () => {
+    setShowAddSubCategoryModal(false);
+  };
+
   const handleUploadBulkClick = () => {
     setShowUploadBulkModal(true);
   };
@@ -65,37 +73,60 @@ function ProductsPage() {
     setShowUploadBulkModal(false);
   };
 
+  // Handler for "Edit Bulk +" button
+  const handleEditBulkClick = () => {
+    setShowEditVariantModal(true);
+  };
+
+  const closeEditVariantModal = () => {
+    setShowEditVariantModal(false);
+  };
+
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
+
   return (
     <RecentOrderWrap className="content-area">
       <HeaderRow>
         <h5>Manage Products</h5>
         <div className="button-group">
-        <SearchBar
+          <SearchBar
             type="text"
             onChange={handleSearchChange}
             placeholder="Search Product"
             value={searchTerm}
           />
-
           <button className="add-product" onClick={handleAddProductClick}>
             Add Product +
+          </button>
+          <button className="add-product" onClick={handleEditBulkClick}>
+            Edit Bulk +
+          </button>
+          <button className="add-product" onClick={handleAddSubCategoryClick}>
+            Add Sub-Category +
           </button>
           <button className="upload-bulk" onClick={handleUploadBulkClick}>
             Upload Bulk +
           </button>
         </div>
       </HeaderRow>
-      <ProductsTable />
+      <ProductsTable searchTerm={searchTerm} />
       <AddProductModal
         show={showAddProductModal}
         onClose={closeAddProductModal}
       />
+      <AddSubCategoryModal
+        visible={showAddSubCategoryModal}
+        onClose={closeAddSubCategoryModal}
+      />
       <UploadBulkModal
         show={showUploadBulkModal}
         onClose={closeUploadBulkModal}
+      />
+      <EditVariantModal
+        show={showEditVariantModal}
+        onClose={closeEditVariantModal}
       />
     </RecentOrderWrap>
   );

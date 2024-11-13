@@ -275,7 +275,7 @@ function ProductsTable() {
                     />
                   ))}
                 </td>
-                <td>{product.price} $</td>
+                <td>₹{product.price}</td>
                 <td>{product.subCategory?.name || "N/A"}</td>
                 <td>{product.category?.name || "N/A"}</td>
                 <td>

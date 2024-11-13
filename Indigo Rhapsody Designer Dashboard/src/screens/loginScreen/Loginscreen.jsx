@@ -89,9 +89,7 @@ function Loginscreen() {
               {loading ? "Logging in..." : "Sign in"}
             </button>
             <div className="separator">or</div>
-            <button type="button" className="google-login-btn">
-              <FaGoogle /> Sign in with Google
-            </button>
+
             <p className="signup-link">
               Don't have an account? <a href="/signup">Sign up</a>
             </p>

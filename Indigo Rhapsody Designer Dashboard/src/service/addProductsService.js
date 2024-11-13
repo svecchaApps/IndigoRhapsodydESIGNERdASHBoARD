@@ -26,7 +26,7 @@ export const getCategory = async () => {
 export const getSubCategory = async (categoryId) => {
   try {
     const response = await fetch(
-      `https://indigo-rhapsody-backend-ten.vercel.app/subcategory/subcategories`,
+      `https://indigo-rhapsody-backend-ten.vercel.app/subcategory/subcategoriesall`,
       {
         method: "GET",
         headers: {
@@ -84,7 +84,7 @@ export const createProduct = async (productData) => {
   }
 };
 
-export const uploadBulkExcel = async (file) => {
+export const uploadBulkExcel = async (fileUrl) => {
   try {
     const designerRef = localStorage.getItem("designerId");
     if (!designerRef) {
@@ -93,16 +93,19 @@ export const uploadBulkExcel = async (file) => {
       );
     }
 
-    // Create a new FormData object
-    const formData = new FormData();
-    formData.append("file", file); // Append the Excel file
-    formData.append("designerRef", designerRef); // Append the designerRef
+    const data = {
+      fileUrl: fileUrl,
+      designerRef: designerRef,
+    };
 
     const response = await fetch(
-      `https://indigo-rhapsody-backend-ten.vercel.app/products/`,
+      `https://indigo-rhapsody-backend-ten.vercel.app/products/uploadBulk`,
       {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       }
     );
 
@@ -111,10 +114,47 @@ export const uploadBulkExcel = async (file) => {
       throw new Error(errorData.message || "Failed to upload data");
     }
 
-    const data = await response.json();
-    return data;
+    const responseData = await response.json();
+    return responseData;
   } catch (error) {
-    // console.error("Error uploading data:", error);
+    console.error("Error in uploadBulkExcel:", error.message);
+    throw error;
+  }
+};
+
+export const edituploadBulkExcel = async (fileUrl) => {
+  try {
+    const designerRef = localStorage.getItem("designerId");
+    if (!designerRef) {
+      throw new Error(
+        "Designer reference is missing. Please log in or check your credentials."
+      );
+    }
+
+    const data = {
+      fileUrl: fileUrl,
+      designerRef: designerRef,
+    };
+
+    const response = await fetch(
+      `https://indigo-rhapsody-backend-ten.vercel.app/products/updateId`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to upload data");
+    }
+
+    const responseData = await response.json();
+    return responseData;
+  } catch (error) {
     throw error;
   }
 };
@@ -153,5 +193,25 @@ export const updateProduct = async (productId, productData) => {
   } catch (error) {
     // console.error("Error updating product:", error);
     throw error; // Rethrow the error to be caught by the UI
+  }
+};
+
+export const AddCategory = async (categoryData) => {
+  try {
+    const response = await fetch(
+      `https://indigo-rhapsody-backend-ten.vercel.app/subcategory/`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(categoryData),
+      }
+    );
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message);
+    }
+    return await response.json();
+  } catch (error) {
+    throw new Error(error.message);
   }
 };

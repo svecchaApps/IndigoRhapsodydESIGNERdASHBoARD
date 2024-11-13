@@ -1,10 +1,10 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
-import { FaUpload } from "react-icons/fa"; // Import the upload icon
-import { uploadBulkExcel } from "../../service/addProductsService";
+import { FaUpload } from "react-icons/fa";
+import { edituploadBulkExcel } from "../../service/addProductsService";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { uploadFileAndGetURL } from "../../service/firebaseStorageService"; // Import the API function
+import { uploadFileAndGetURL } from "../../service/firebaseStorageService";
 
 const ModalOverlay = styled.div`
   display: ${(props) => (props.show ? "block" : "none")};
@@ -53,7 +53,7 @@ const DropZone = styled.div`
   }
 `;
 
-const button = styled.div`
+const Button = styled.button`
   .add-button {
     padding: 0 10px;
     border: none;
@@ -79,8 +79,7 @@ const ProgressBar = styled.div`
     transition: width 0.3s;
   }
 `;
-
-function UploadBulkModal({ show, onClose }) {
+function EditVariantModal({ show, onClose }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -115,16 +114,16 @@ function UploadBulkModal({ show, onClose }) {
 
         // Step 2: Call the backend API with the file URL
         setProgress(60);
-        const response = await uploadBulkExcel(fileUrl);
+        const response = await edituploadBulkExcel(fileUrl);
 
         setProgress(100);
-        toast.success("Products uploaded successfully!");
+        toast.success("Product variants updated successfully!");
 
         onClose(); // Close the modal after upload
         window.location.reload(); // Refresh the page to reflect new data
       } catch (error) {
         setProgress(0);
-        toast.error("Error uploading products");
+        toast.error("Error updating product variants");
         console.error("Failed to upload file:", error.message);
       } finally {
         setUploading(false);
@@ -140,9 +139,9 @@ function UploadBulkModal({ show, onClose }) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <ModalContent>
-        <h3>Upload Bulk Products</h3>
+        <h3>Edit Product Variants</h3>
         {uploading && (
-          <ProgressBar>
+          <ProgressBar progress={progress}>
             <div className="progress" style={{ width: `${progress}%` }}></div>
           </ProgressBar>
         )}
@@ -165,18 +164,17 @@ function UploadBulkModal({ show, onClose }) {
               : "Drag & drop or click to upload a file"}
           </p>
         </DropZone>
-        <button
+        <Button
           type="button"
           onClick={handleUpload}
           style={{ marginTop: "20px", padding: "10px 20px" }}
           disabled={uploading}
         >
           {uploading ? "Uploading..." : "Upload"}
-        </button>
-        <ToastContainer />
+        </Button>
       </ModalContent>
     </ModalOverlay>
   );
 }
 
-export default UploadBulkModal;
+export default EditVariantModal;

@@ -30,7 +30,7 @@ export const BlockWrapStyles = css`
   background: ${(props) => props.theme.colors.white};
   box-shadow: 0 0.25rem 1.125rem rgba(75, 70, 92, 0.1);
   border-radius: 6px;
-  padding: 20px;
+  padding: 10px;
 
   ${media.xxxl`
     padding: 12px;
