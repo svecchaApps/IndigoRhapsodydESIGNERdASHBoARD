@@ -29,8 +29,7 @@ const ReturnRequest = () => {
     try {
       await CreateReturnRequest(returnId);
       message.success("Return request processed successfully");
-      // Optionally, refresh returnRequests to reflect the updated status
-      fetchReturnRequests();
+      // Refresh returnRequests to reflect the updated status
     } catch (error) {
       message.error(`Failed to process return request: ${error.message}`);
     }
@@ -83,6 +82,7 @@ const ReturnRequest = () => {
         <Button
           type="primary"
           onClick={() => handleProcessReturn(record.products.returnId)}
+          disabled={record.products.returnStatus === "Return Processed"}
         >
           Process
         </Button>
