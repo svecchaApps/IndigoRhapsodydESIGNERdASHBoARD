@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Form, Input, Select, Upload, Button, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { storage } from "../../service/FirebaseService";
+import { storage } from "../../service/firebaseService";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getCategory, AddCategory } from "../../service/addProductsService";
 
