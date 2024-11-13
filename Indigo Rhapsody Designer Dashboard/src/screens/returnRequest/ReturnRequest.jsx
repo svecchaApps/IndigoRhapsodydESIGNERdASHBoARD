@@ -1,38 +1,9 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { getReturnRequest } from "../../service/returnRequest";
-
-const TableContainer = styled.div`
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-`;
-
-const StyledTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  overflow: hidden;
-
-  th,
-  td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-
-  th {
-    background-color: #f4f4f4;
-    font-weight: 600;
-  }
-
-  tr:hover {
-    background-color: #f1f1f1;
-  }
-`;
+import { Table, Button, message } from "antd";
+import {
+  getReturnRequest,
+  CreateReturnRequest,
+} from "../../service/returnRequest";
 
 const ReturnRequest = () => {
   const [returnRequests, setReturnRequests] = useState([]);
@@ -43,7 +14,7 @@ const ReturnRequest = () => {
     const fetchReturnRequests = async () => {
       try {
         const data = await getReturnRequest();
-        setReturnRequests(data.returnRequests || []); // Use 'returnRequests' based on the response structure
+        setReturnRequests(data.returnRequests || []);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -54,6 +25,71 @@ const ReturnRequest = () => {
     fetchReturnRequests();
   }, []);
 
+  const handleProcessReturn = async (returnId) => {
+    try {
+      await CreateReturnRequest(returnId);
+      message.success("Return request processed successfully");
+      // Optionally, refresh returnRequests to reflect the updated status
+      fetchReturnRequests();
+    } catch (error) {
+      message.error(`Failed to process return request: ${error.message}`);
+    }
+  };
+
+  const columns = [
+    {
+      title: "Return ID",
+      dataIndex: ["products", "returnId"],
+      key: "returnId",
+    },
+    {
+      title: "Order ID",
+      dataIndex: "orderId",
+      key: "orderId",
+    },
+    {
+      title: "Product Name",
+      dataIndex: ["products", "productName"],
+      key: "productName",
+    },
+    {
+      title: "Status",
+      dataIndex: ["products", "returnStatus"],
+      key: "returnStatus",
+      render: (status) => (
+        <span
+          style={{
+            backgroundColor:
+              status === "Return Processed" ? "#d4edda" : "#fff3cd",
+            color: status === "Return Processed" ? "#155724" : "#856404",
+            padding: "4px 8px",
+            borderRadius: "4px",
+          }}
+        >
+          {status}
+        </span>
+      ),
+    },
+    {
+      title: "Created Date",
+      dataIndex: "createdDate",
+      key: "createdDate",
+      render: (createdDate) => new Date(createdDate).toLocaleDateString(),
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <Button
+          type="primary"
+          onClick={() => handleProcessReturn(record.products.returnId)}
+        >
+          Process
+        </Button>
+      ),
+    },
+  ];
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -63,37 +99,15 @@ const ReturnRequest = () => {
   }
 
   return (
-    <TableContainer>
+    <div style={{ padding: 20, backgroundColor: "#f9f9f9" }}>
       <h2>Return Requests</h2>
-      <StyledTable>
-        <thead>
-          <tr>
-            <th>Return ID</th>
-            <th>Order ID</th>
-            <th>Product Name</th>
-            <th>Status</th>
-
-            <th>Created Date</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {returnRequests.map((request, index) => (
-            <tr key={index}>
-              <td>{request.products.returnId}</td>
-              <td>{request.orderId}</td>
-              <td>{request.products.productName}</td>
-
-              <td>{request.products.returnStatus}</td>
-              <td>{new Date(request.createdDate).toLocaleDateString()}</td>
-              <td>
-                <button>Process</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </StyledTable>
-    </TableContainer>
+      <Table
+        dataSource={returnRequests}
+        columns={columns}
+        rowKey={(record) => record.products.returnId}
+        pagination={{ pageSize: 10 }}
+      />
+    </div>
   );
 };
 
