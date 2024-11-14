@@ -26,7 +26,7 @@ export const getCategory = async () => {
 export const getSubCategory = async (categoryId) => {
   try {
     const response = await fetch(
-      `https://indigo-rhapsody-backend-ten.vercel.app/subcategory/subcategoriesall`,
+      `https://indigo-rhapsody-backend-ten.vercel.app/subcategory/getSubCategoriesByCategory/${categoryId}`,
       {
         method: "GET",
         headers: {

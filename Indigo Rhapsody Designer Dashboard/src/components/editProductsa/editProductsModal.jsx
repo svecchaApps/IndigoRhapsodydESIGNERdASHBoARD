@@ -178,20 +178,6 @@ function EditProductModal({ show, onClose, product }) {
 
   useEffect(() => {
     if (show) {
-      const fetchInitialData = async () => {
-        try {
-          const subCategoryData = await getSubCategory();
-          setSubCategories(subCategoryData.subCategories || []);
-        } catch (error) {
-          // console.error("Failed to fetch subcategories:", error);
-        }
-      };
-      fetchInitialData();
-    }
-  }, [show]);
-
-  useEffect(() => {
-    if (show) {
       const fetchCategories = async () => {
         try {
           const categoryData = await getCategory();
@@ -203,6 +189,22 @@ function EditProductModal({ show, onClose, product }) {
       fetchCategories();
     }
   }, [show]);
+  useEffect(() => {
+    if (selectedCategory) {
+      // Fetch subcategories when a category is selected
+      const fetchSubCategories = async () => {
+        try {
+          const subCategoryData = await getSubCategory(selectedCategory);
+          setSubCategories(subCategoryData.subCategories || []);
+        } catch (error) {
+          console.error("Failed to fetch subcategories:", error);
+        }
+      };
+      fetchSubCategories();
+    } else {
+      setSubCategories([]);
+    }
+  }, [selectedCategory]);
 
   const [variants, setVariants] = useState(
     product.variants || [
@@ -280,6 +282,7 @@ function EditProductModal({ show, onClose, product }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const productData = {
         ...formData,

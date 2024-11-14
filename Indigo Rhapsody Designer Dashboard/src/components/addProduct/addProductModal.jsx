@@ -173,19 +173,6 @@ function AddProductModal({ show, onClose }) {
     fabric: "",
     material: "",
   });
-  useEffect(() => {
-    if (show) {
-      const fetchInitialData = async () => {
-        try {
-          const subCategoryData = await getSubCategory();
-          setSubCategories(subCategoryData.subCategories || []); // Make sure to use 'subCategories' key from the response
-        } catch (error) {
-          // console.error("Failed to fetch subcategories:", error);
-        }
-      };
-      fetchInitialData();
-    }
-  }, [show]);
 
   useEffect(() => {
     if (show) {
@@ -201,6 +188,22 @@ function AddProductModal({ show, onClose }) {
       fetchCategories();
     }
   }, [show]);
+  useEffect(() => {
+    if (selectedCategory) {
+      // Fetch subcategories when a category is selected
+      const fetchSubCategories = async () => {
+        try {
+          const subCategoryData = await getSubCategory(selectedCategory);
+          setSubCategories(subCategoryData.subCategories || []);
+        } catch (error) {
+          console.error("Failed to fetch subcategories:", error);
+        }
+      };
+      fetchSubCategories();
+    } else {
+      setSubCategories([]);
+    }
+  }, [selectedCategory]);
 
   const [variants, setVariants] = useState([
     {
@@ -308,6 +311,15 @@ function AddProductModal({ show, onClose }) {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!coverImage) {
+      toast.error("Cover image is required.");
+      return;
+    }
+    if (!coverImageUrl) {
+      toast.error("Cover image is required.");
+      return;
+    }
+
     try {
       const productData = {
         ...formData,
