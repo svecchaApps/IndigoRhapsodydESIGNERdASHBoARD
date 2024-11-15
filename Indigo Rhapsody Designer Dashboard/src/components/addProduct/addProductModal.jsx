@@ -218,6 +218,11 @@ function AddProductModal({ show, onClose }) {
     newVariants[colorIndex].sizes.push({ size: "", price: "", stock: "" });
     setVariants(newVariants);
   };
+  const handleRemoveSize = (colorIndex, sizeIndex) => {
+    const newVariants = [...variants];
+    newVariants[colorIndex].sizes.splice(sizeIndex, 1);
+    setVariants(newVariants);
+  };
 
   const handleVariantChange = (e, colorIndex, sizeIndex = null, field) => {
     const { value } = e.target;
@@ -303,6 +308,11 @@ function AddProductModal({ show, onClose }) {
       // console.error("Error uploading image list:", error);
       alert("Failed to upload some images");
     }
+  };
+  const handleRemoveColorVariant = (colorIndex) => {
+    const newVariants = [...variants];
+    newVariants.splice(colorIndex, 1);
+    setVariants(newVariants);
   };
 
   const handleRemoveImage = (index) => {
@@ -390,15 +400,25 @@ function AddProductModal({ show, onClose }) {
             <h4>Variants</h4>
             {variants.map((variant, colorIndex) => (
               <div key={colorIndex}>
-                <label>Color</label>
-                <input
-                  type="text"
-                  placeholder="Color"
-                  value={variant.color}
-                  onChange={(e) =>
-                    handleVariantChange(e, colorIndex, null, "color")
-                  }
-                />
+                <div className="input-group">
+                  <label>Color</label>
+                  <input
+                    type="text"
+                    placeholder="Color"
+                    value={variant.color}
+                    onChange={(e) =>
+                      handleVariantChange(e, colorIndex, null, "color")
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="remove-button"
+                    onClick={() => handleRemoveColorVariant(colorIndex)}
+                  >
+                    -
+                  </button>
+                </div>
+
                 <label>Upload Images for {variant.color}</label>
                 <div className="drop-zone">
                   <input
@@ -434,6 +454,49 @@ function AddProductModal({ show, onClose }) {
                     ))}
                   </div>
                 )}
+
+                {variant.sizes.map((size, sizeIndex) => (
+                  <div key={sizeIndex} className="input-group">
+                    <input
+                      type="text"
+                      placeholder="Size"
+                      value={size.size}
+                      onChange={(e) =>
+                        handleVariantChange(e, colorIndex, sizeIndex, "size")
+                      }
+                    />
+                    <input
+                      type="number"
+                      placeholder="Price"
+                      value={size.price}
+                      onChange={(e) =>
+                        handleVariantChange(e, colorIndex, sizeIndex, "price")
+                      }
+                    />
+                    <input
+                      type="number"
+                      placeholder="Stock"
+                      value={size.stock}
+                      onChange={(e) =>
+                        handleVariantChange(e, colorIndex, sizeIndex, "stock")
+                      }
+                    />
+                    <button
+                      type="button"
+                      className="add-button"
+                      onClick={() => handleAddSize(colorIndex)}
+                    >
+                      +
+                    </button>
+                    <button
+                      type="button"
+                      className="remove-button"
+                      onClick={() => handleRemoveSize(colorIndex, sizeIndex)}
+                    >
+                      -
+                    </button>
+                  </div>
+                ))}
               </div>
             ))}
             <button
@@ -529,64 +592,7 @@ function AddProductModal({ show, onClose }) {
               />
             </div>
           </FormSection>
-          <FormSection>
-            <h4>Variants</h4>
-            {variants.map((variant, colorIndex) => (
-              <div key={colorIndex}>
-                <label>Color</label>
-                <input
-                  type="text"
-                  placeholder="Color"
-                  value={variant.color}
-                  onChange={(e) =>
-                    handleVariantChange(e, colorIndex, null, "color")
-                  }
-                />
-                {variant.sizes.map((size, sizeIndex) => (
-                  <div key={sizeIndex} className="input-group">
-                    <input
-                      type="text"
-                      placeholder="Size"
-                      value={size.size}
-                      onChange={(e) =>
-                        handleVariantChange(e, colorIndex, sizeIndex, "size")
-                      }
-                    />
-                    <input
-                      type="number"
-                      placeholder="Price"
-                      value={size.price}
-                      onChange={(e) =>
-                        handleVariantChange(e, colorIndex, sizeIndex, "price")
-                      }
-                    />
-                    <input
-                      type="number"
-                      placeholder="Stock"
-                      value={size.stock}
-                      onChange={(e) =>
-                        handleVariantChange(e, colorIndex, sizeIndex, "stock")
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="add-button"
-                      onClick={() => handleAddSize(colorIndex)}
-                    >
-                      +
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ))}
-            <button
-              type="button"
-              className="add-button"
-              onClick={handleAddColor}
-            >
-              + Add Color
-            </button>
-          </FormSection>
+
           <FormSection>
             <h4>Category</h4>
             <select

@@ -7,6 +7,7 @@ import {
 import { BlockContentWrap, BlockTitle } from "../../../styles/global/default";
 import { Icons } from "../../../assets/icons";
 import { SalesBlockWrap } from "./Sales.style";
+
 const Sales = () => {
   const [ordersData, setOrdersData] = useState(null);
   const [salesData, setSalesData] = useState(null);
@@ -15,25 +16,49 @@ const Sales = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProducts = async () => {
+      try {
+        const productsResponse = await dashBoardDesignerProducts();
+        console.log("Products Response:", productsResponse);
+        setProductsData(productsResponse);
+      } catch (error) {
+        console.error("Error fetching products:", error.message);
+      }
+    };
+
+    const fetchOrders = async () => {
       try {
         const ordersResponse = await dashBoardDesigner();
         setOrdersData(ordersResponse);
+      } catch (error) {
+        console.error("Error fetching orders:", error.message);
+      }
+    };
 
+    const fetchSales = async () => {
+      try {
         const salesResponse = await dashBoardDesignerSales();
         setSalesData(salesResponse);
-
-        const productsResponse = await dashBoardDesignerProducts();
-        setProductsData(productsResponse);
-
-        setLoading(false);
       } catch (error) {
-        setError(error.message);
+        console.error("Error fetching sales:", error.message);
+      }
+    };
+
+    const fetchAllData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Fetch all data independently
+        await Promise.all([fetchProducts(), fetchOrders(), fetchSales()]);
+      } catch (err) {
+        setError("Error fetching data.");
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchAllData();
   }, []);
 
   return (
@@ -62,7 +87,7 @@ const Sales = () => {
                 <img src={Icons.CardOrder} alt="Orders Icon" />
               </div>
               <div className="card-item-value">
-                {ordersData ? ordersData.totalOrders : "N/A"}
+                {ordersData ? ordersData.totalOrders : "Error fetching orders"}
               </div>
               <p className="card-item-text text">Total Orders</p>
               <span className="card-item-sm-text">orders</span>
@@ -72,7 +97,9 @@ const Sales = () => {
                 <img src={Icons.CardSales} alt="Sales Icon" />
               </div>
               <div className="card-item-value">
-                {salesData ? `₹ ${salesData.totalSalesAmount}` : "N/A"}
+                {salesData
+                  ? `₹ ${salesData.totalSalesAmount}`
+                  : "Error fetching sales"}
               </div>
               <p className="card-item-text text">Total Sales</p>
               <span className="card-item-sm-text">sales</span>
@@ -82,7 +109,9 @@ const Sales = () => {
                 <img src={Icons.CardProduct} alt="Products Icon" />
               </div>
               <div className="card-item-value">
-                {productsData ? productsData.totalProducts : "N/A"}
+                {productsData
+                  ? productsData.totalProducts
+                  : "Error fetching products"}
               </div>
               <p className="card-item-text text">Total Products</p>
               <span className="card-item-sm-text">products</span>

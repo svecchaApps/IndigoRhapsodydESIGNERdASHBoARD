@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { AppBarWrap } from "./Appbar.styles";
 import { MdOutlineMenu, MdNotificationsNone } from "react-icons/md";
 import { Icons } from "../../assets/icons";
 import { useNavigate } from "react-router-dom";
-import { dashBoardDesigner } from "../../service/notificationService"; // Adjust the path as necessary
 
 function AppBar() {
   const navigate = useNavigate();
@@ -16,48 +15,22 @@ function AppBar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const inputControlRef = useRef(null);
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const data = await dashBoardDesigner();
-        setNotifications(data.notifications || []);
-        // const unread = data.notifications.filter((notif) => !notif.seen).length;
-        setUnreadCount(unread);
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    };
-
-    fetchNotifications();
-  }, []);
+  // Define the list of pages for search functionality
+  const pages = [
+    { name: "Orders", path: "/dashboard/orders" },
+    { name: "Products", path: "/dashboard/products" },
+    { name: "Customers", path: "/dashboard/customers" },
+    { name: "Reports", path: "/dashboard/reports" },
+    { name: "Settings", path: "/dashboard/settings" },
+  ];
 
   const handleInputControlVisibility = () => setShowInputControl(true);
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const data = await dashBoardDesigner();
-        if (data && Array.isArray(data.notifications)) {
-          setNotifications(data.notifications);
-          const unread = data.notifications.filter(
-            (notif) => !notif.seen
-          ).length;
-          setUnreadCount(unread);
-        } else {
-          setNotifications([]); // Set an empty array if notifications are undefined or not an array
-          setUnreadCount(0);
-        }
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    };
-
-    fetchNotifications();
-  }, []);
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
+
+    // Filter pages based on the search query
     if (query) {
       const filtered = pages.filter((page) =>
         page.name.toLowerCase().includes(query.toLowerCase())
@@ -80,8 +53,7 @@ function AppBar() {
   };
 
   const handleNotificationClick = (notification) => {
-    // Mark the notification as read (update backend if necessary)
-    notification.seen = true; // This is for immediate UI feedback; sync with backend as needed
+    notification.seen = true; // Immediate UI feedback; sync with backend if necessary
     setUnreadCount(unreadCount - 1);
     navigate("/dashboard/orders");
   };
@@ -105,7 +77,7 @@ function AppBar() {
                 >
                   <img
                     src={Icons.SearchBlue}
-                    alt=""
+                    alt="Search Icon"
                     className="input-icon-img"
                   />
                 </span>
@@ -118,6 +90,7 @@ function AppBar() {
                     showInputControl ? "show-input-control" : ""
                   }`}
                 />
+                {/* Display suggestions dynamically */}
                 {showInputControl && filteredPages.length > 0 && (
                   <ul className="search-results">
                     {filteredPages.map((page, index) => (
