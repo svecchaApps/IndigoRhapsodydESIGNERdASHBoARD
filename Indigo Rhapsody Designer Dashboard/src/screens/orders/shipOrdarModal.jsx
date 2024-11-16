@@ -60,7 +60,6 @@ const ProductList = styled.ul`
 const ProductItem = styled.li`
   margin-bottom: 10px;
 `;
-
 const ShipOrderModal = ({ show, onClose, order }) => {
   const [formData, setFormData] = useState({
     height: "",
@@ -70,6 +69,7 @@ const ShipOrderModal = ({ show, onClose, order }) => {
   });
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // New loading state
 
   if (!order) return null;
 
@@ -90,25 +90,27 @@ const ShipOrderModal = ({ show, onClose, order }) => {
       weight: formData.weight,
       length: formData.length,
       breadth: formData.breadth,
-      pickup_Location: "New",
+      pickup_Location: localStorage.getItem("designerId"),
     };
 
-    // console.log("Request body being sent to API:", requestBody);
+    setIsSubmitting(true); // Start loading state
 
     try {
-      // Replace this with your actual API function call
       const result = await createShippingOrder(requestBody);
       setResponse(result);
       setError(null);
-      toast.success("Product created successfully!");
-      // alert("Shipping order created successfully");
+      toast.success("Shipping order created successfully!");
       onClose();
     } catch (err) {
       setError(err.message);
-      toast.error(`Failed to create product: ${error.message}`);
-      // alert("Failed to create shipping order");
+      toast.error(`Failed to create shipping order: ${err.message}`);
+    } finally {
+      setIsSubmitting(false); // End loading state
     }
   };
+
+  const isFormValid =
+    formData.height && formData.weight && formData.length && formData.breadth;
 
   return (
     <>
@@ -130,6 +132,7 @@ const ShipOrderModal = ({ show, onClose, order }) => {
           placeholder="Height"
           value={formData.height}
           onChange={handleInputChange}
+          required
         />
         <Input
           type="number"
@@ -137,6 +140,7 @@ const ShipOrderModal = ({ show, onClose, order }) => {
           placeholder="Weight"
           value={formData.weight}
           onChange={handleInputChange}
+          required
         />
         <Input
           type="number"
@@ -144,6 +148,7 @@ const ShipOrderModal = ({ show, onClose, order }) => {
           placeholder="Length"
           value={formData.length}
           onChange={handleInputChange}
+          required
         />
         <Input
           type="number"
@@ -151,8 +156,11 @@ const ShipOrderModal = ({ show, onClose, order }) => {
           placeholder="Breadth"
           value={formData.breadth}
           onChange={handleInputChange}
+          required
         />
-        <Button type="submit">Ship Order</Button>
+        <Button type="submit" disabled={!isFormValid || isSubmitting}>
+          {isSubmitting ? "Processing..." : "Ship Order"}
+        </Button>
       </Form>
       {response && (
         <div>
@@ -171,3 +179,4 @@ const ShipOrderModal = ({ show, onClose, order }) => {
 };
 
 export default ShipOrderModal;
+ 

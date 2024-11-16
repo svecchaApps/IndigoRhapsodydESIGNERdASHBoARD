@@ -39,7 +39,7 @@ export const createManifest = async (shipmentId) => {
 
 export const createInvoice = async (shipmentId) => {
   const response = await fetch(
-    "https://indigo-rhapsody-backend-ten.vercel.app/shipping/generate-invoice",
+    "https://indigo-rhapsody-backend-ten.vercel.app/shipping/generate-manifest",
     {
       method: "POST",
       headers: {

@@ -85,9 +85,8 @@ function OrderDetailsModal({ show, onClose, selectedOrder }) {
 
   return (
     <>
-      <CloseButton onClick={onClose}>&times;</CloseButton>
+      {/* <CloseButton onClick={onClose}>&times;</CloseButton> */}
       <ModalHeader>
-        <h3>Order Details</h3>
         <span>Status: {selectedOrder.status}</span>
       </ModalHeader>
 
@@ -103,15 +102,16 @@ function OrderDetailsModal({ show, onClose, selectedOrder }) {
         <SectionContent>
           <DetailsRow>
             <p>
-              <strong>Name:</strong> {selectedOrder.customerName || "N/A"}
+              <strong>Name:</strong> {selectedOrder.userId.displayName || "N/A"}
             </p>
             <p>
-              <strong>Email:</strong> {selectedOrder.customerEmail || "N/A"}
+              <strong>Email:</strong> {selectedOrder.userId.email || "N/A"}
             </p>
           </DetailsRow>
           <DetailsRow>
             <p>
-              <strong>Phone:</strong> {selectedOrder.customerPhone || "N/A"}
+              <strong>Phone:</strong>{" "}
+              {selectedOrder.userId.phoneNumber || "N/A"}
             </p>
           </DetailsRow>
         </SectionContent>
@@ -145,7 +145,7 @@ function OrderDetailsModal({ show, onClose, selectedOrder }) {
         <SectionTitle>Order Summary</SectionTitle>
         <SectionContent>
           <p>
-            <strong>Total Amount:</strong> ₹ 
+            <strong>Total Amount:</strong> ₹
             {selectedOrder.products.reduce(
               (sum, product) => sum + product.price * product.quantity,
               0

@@ -4,6 +4,8 @@ import {
   getShippingDetails,
   createInvoice,
 } from "../../service/shippinService";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 const TableContainer = styled.div`
   padding: 20px;
@@ -42,7 +44,6 @@ const StyledTable = styled.table`
     cursor: pointer;
   }
 `;
-
 const ShippingPage = () => {
   const [shippings, setShippings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,8 +67,8 @@ const ShippingPage = () => {
   const handleDownloadInvoice = async (shipmentId) => {
     try {
       const invoiceData = await createInvoice(shipmentId);
-      const invoiceUrl = invoiceData.invoice_url;
 
+      const invoiceUrl = invoiceData.label_url;
 
       const link = document.createElement("a");
       link.href = invoiceUrl;
@@ -75,8 +76,10 @@ const ShippingPage = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      toast.success("Invoice downloaded successfully!");
     } catch (err) {
-      alert(`Failed to download invoice: ${err.message}`);
+      toast.error(`Failed to download invoice: ${err.message}`);
     }
   };
 
@@ -90,6 +93,7 @@ const ShippingPage = () => {
 
   return (
     <TableContainer>
+      <ToastContainer />
       <h2>Shipped Orders</h2>
       <StyledTable>
         <thead>

@@ -156,10 +156,10 @@ function EditProductModal({ show, onClose, product }) {
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(
-    product.category?.name || ""
+    product.category?._id || "" // Use the category ID to match the options
   );
   const [selectedSubCategory, setSelectedSubCategory] = useState(
-    product.subCategory?.name || ""
+    product.subCategory?._id || "" // Use the subcategory ID to match the options
   );
   const [coverImageUrl, setCoverImageUrl] = useState(product.coverImage || "");
   const [imageUrls, setImageUrls] = useState(

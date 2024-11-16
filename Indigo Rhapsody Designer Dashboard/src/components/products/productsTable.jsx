@@ -242,6 +242,7 @@ function ProductsTable() {
               <th>Category</th>
               <th>Colors</th>
               <th>Sizes</th>
+
               <th>Actions</th>
             </tr>
           </thead>
@@ -297,7 +298,9 @@ function ProductsTable() {
                   <ul>
                     {product.variants.flatMap((variant) =>
                       variant.sizes.map((size, sIndex) => (
-                        <li key={sIndex}>{size.size}</li>
+                        <li key={sIndex}>
+                          {size.size} - {size.stock}
+                        </li>
                       ))
                     )}
                   </ul>
@@ -436,12 +439,12 @@ function ProductsTable() {
               <label htmlFor="variants">Variants</label>
               <textarea
                 id="variants"
-                rows="3"
+                rows="6"
                 defaultValue={selectedProduct.variants
                   .map(
                     (variant) =>
                       `Color: ${variant.color}, Sizes: ${variant.sizes
-                        .map((size) => size.size)
+                        .map((size) => `${size.size} (${size.stock} )`)
                         .join(", ")}`
                   )
                   .join("\n")}
