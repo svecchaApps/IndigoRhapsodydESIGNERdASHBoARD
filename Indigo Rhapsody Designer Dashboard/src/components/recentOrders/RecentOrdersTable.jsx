@@ -53,9 +53,9 @@ function RecentOrdersTable() {
       dataIndex: "paymentMethod",
       key: "paymentMethod",
       filters: [
-        { text: "Credit Card", value: "Credit Card" },
-        { text: "PayPal", value: "PayPal" },
-        { text: "Cash on Delivery", value: "Cash on Delivery" },
+        { text: "Phonepe ", value: "Phonepe" },
+        { text: "Cash On delivery", value: "Cash On delivery" },
+
         // Add more payment methods as needed
       ],
       onFilter: (value, record) => record.paymentMethod === value,
@@ -65,7 +65,7 @@ function RecentOrdersTable() {
       dataIndex: "status",
       key: "status",
       filters: [
-        { text: "Pending", value: "Pending" },
+        { text: "Order Placed", value: "Order Placed" },
         { text: "Completed", value: "Completed" },
         { text: "Cancelled", value: "Cancelled" },
         // Add more statuses as needed
