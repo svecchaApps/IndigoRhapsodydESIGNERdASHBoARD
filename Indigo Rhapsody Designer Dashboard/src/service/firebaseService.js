@@ -36,7 +36,7 @@ export const getFcmToken = async () => {
       vapidKey: "YOUR_VAPID_KEY",
     });
     if (currentToken) {
-      console.log("FCM Token:", currentToken);
+
       return currentToken;
     } else {
       console.warn(

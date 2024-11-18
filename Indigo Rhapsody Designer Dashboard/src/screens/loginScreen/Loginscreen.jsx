@@ -62,10 +62,7 @@ function Loginscreen() {
       <LeftSection>
         <FormContainer>
           <h1>Welcome Back!</h1>
-          <p>
-            Ofative empowers you to manage, enhance, and safeguard your day,
-            putting you in control of your schedule.
-          </p>
+          <p>Access Your admin panel from here</p>
           <form onSubmit={handleLogin}>
             <div className="form-group">
               <input

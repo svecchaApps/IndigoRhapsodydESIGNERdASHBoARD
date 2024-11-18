@@ -293,10 +293,8 @@ function EditProductModal({ show, onClose, product }) {
         coverImage: coverImageUrl,
       };
 
-      // console.log("Product data being sent:", productData);
-
       const response = await updateProduct(product._id, productData);
-      // console.log("Product updated successfully:", response);
+
       onClose();
       window.location.reload();
     } catch (error) {

@@ -19,7 +19,7 @@ const Sales = () => {
     const fetchProducts = async () => {
       try {
         const productsResponse = await dashBoardDesignerProducts();
-        console.log("Products Response:", productsResponse);
+
         setProductsData(productsResponse);
       } catch (error) {
         console.error("Error fetching products:", error.message);

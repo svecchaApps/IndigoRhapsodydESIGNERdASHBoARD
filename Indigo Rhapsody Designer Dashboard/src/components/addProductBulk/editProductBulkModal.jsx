@@ -88,14 +88,14 @@ function EditVariantModal({ show, onClose }) {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
-    console.log("Selected file:", selectedFile);
+
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     const droppedFile = e.dataTransfer.files[0];
     setFile(droppedFile);
-    console.log("Dropped file:", droppedFile);
+
   };
 
   const handleDragOver = (e) => {
@@ -103,7 +103,7 @@ function EditVariantModal({ show, onClose }) {
   };
 
   const handleUpload = async () => {
-    console.log("handleUpload called with file:", file);
+
     if (file) {
       setUploading(true);
       setProgress(10); // Initial progress

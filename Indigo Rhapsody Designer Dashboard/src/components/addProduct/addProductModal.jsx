@@ -339,16 +339,15 @@ function AddProductModal({ show, onClose }) {
         coverImage: coverImageUrl,
       };
 
-      // console.log("Product data being sent:", productData);
+
 
       const response = await createProduct(productData);
-      // console.log("Product created successfully:", response);
+
       toast.success("Product created successfully!");
       onClose();
       window.location.reload();
     } catch (error) {
-      // console.error("Error creating product:", error.message);
-      // alert("Failed to create product");
+
       toast.error(`Failed to create product: ${error.message}`);
     }
   };
