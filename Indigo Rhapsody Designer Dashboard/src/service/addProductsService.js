@@ -1,13 +1,15 @@
-const BASE_URL = process.env.API_BASE_URL;
 export const getCategory = async () => {
   try {
     const designerId = localStorage.getItem("designerId");
-    const response = await fetch(`${BASE_URL}/category`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `https://indigo-rhapsody-backend-ten.vercel.app/category`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -24,7 +26,7 @@ export const getCategory = async () => {
 export const getSubCategory = async (categoryId) => {
   try {
     const response = await fetch(
-      `${BASE_URL}/subcategory/getSubCategoriesByCategory/${categoryId}`,
+      `https://indigo-rhapsody-backend-ten.vercel.app/subcategory/getSubCategoriesByCategory/${categoryId}`,
       {
         method: "GET",
         headers: {
@@ -57,13 +59,16 @@ export const createProduct = async (productData) => {
       designerRef: designerRef, // Append designerRef
     };
 
-    const response = await fetch(`${BASE_URL}/products/createProduct`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(dataWithDesignerRef),
-    });
+    const response = await fetch(
+      "https://indigo-rhapsody-backend-ten.vercel.app/products/createProduct",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataWithDesignerRef),
+      }
+    );
 
     if (!response.ok) {
       // Handle HTTP errors
@@ -93,13 +98,16 @@ export const uploadBulkExcel = async (fileUrl) => {
       designerRef: designerRef,
     };
 
-    const response = await fetch(`${BASE_URL}/products/uploadBulk`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(
+      `https://indigo-rhapsody-backend-ten.vercel.app/products/uploadBulk`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -128,13 +136,16 @@ export const edituploadBulkExcel = async (fileUrl) => {
       designerRef: designerRef,
     };
 
-    const response = await fetch(`${BASE_URL}/products/updateId`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(
+      `https://indigo-rhapsody-backend-ten.vercel.app/products/updateId`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -160,13 +171,16 @@ export const updateProduct = async (productId, productData) => {
     };
 
     // Use the productId in the URL
-    const response = await fetch(`${BASE_URL}/products/products/${productId}`, {
-      method: "PUT", // Use PUT for updates
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(dataWithDesignerRef),
-    });
+    const response = await fetch(
+      `https://indigo-rhapsody-backend-ten.vercel.app/products/products/${productId}`,
+      {
+        method: "PUT", // Use PUT for updates
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataWithDesignerRef),
+      }
+    );
 
     if (!response.ok) {
       // Handle HTTP errors
@@ -184,11 +198,14 @@ export const updateProduct = async (productId, productData) => {
 
 export const AddCategory = async (categoryData) => {
   try {
-    const response = await fetch(`${BASE_URL}/subcategory/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(categoryData),
-    });
+    const response = await fetch(
+      `https://indigo-rhapsody-backend-ten.vercel.app/subcategory/`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(categoryData),
+      }
+    );
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message);

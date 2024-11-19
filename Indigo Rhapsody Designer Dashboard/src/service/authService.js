@@ -1,14 +1,16 @@
 // authService.js
-const BASE_URL = process.env.API_BASE_URL;
 export const loginDesigner = async (email, password) => {
   try {
-    const response = await fetch(`${BASE_URL}/user/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    const response = await fetch(
+      "https://indigo-rhapsody-backend-ten.vercel.app/user/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      }
+    );
 
     if (!response.ok) {
       // Handle HTTP errors

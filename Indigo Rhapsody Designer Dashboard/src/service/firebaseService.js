@@ -2,17 +2,14 @@
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID,
+  apiKey: "AIzaSyAZe8Wl9jPF-IpJQCws9d5DRFM-69ZqDgg",
+  authDomain: "sveccha-11c31.firebaseapp.com",
+  projectId: "sveccha-11c31",
+  storageBucket: "sveccha-11c31.appspot.com",
+  messagingSenderId: "904787268928",
+  appId: "1:904787268928:web:a801ffdbbc6426f72456a5",
 };
 
 export const uploadImageToFirebase = async (file, folder) => {
@@ -39,6 +36,7 @@ export const getFcmToken = async () => {
       vapidKey: "YOUR_VAPID_KEY",
     });
     if (currentToken) {
+      console.log("FCM Token:", currentToken);
       return currentToken;
     } else {
       console.warn(

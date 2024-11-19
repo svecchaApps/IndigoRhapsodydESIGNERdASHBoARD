@@ -1,4 +1,5 @@
-const BASE_URL = process.env.API_BASE_URL;
+
+const BASE_URL = "https://indigo-rhapsody-backend-ten.vercel.app";
 
 const designerId = localStorage.getItem("designerId");
 

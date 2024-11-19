@@ -1,9 +1,8 @@
-const BASE_URL = process.env.API_BASE_URL;
 export const dashBoardDesigner = async () => {
   try {
     const designerId = localStorage.getItem("designerId");
     const response = await fetch(
-      `${BASE_URL}/order/total-orders/designer/${designerId}`,
+      `https://indigo-rhapsody-backend-ten.vercel.app/order/total-orders/designer/${designerId}`,
       {
         method: "GET",
         headers: {
@@ -28,7 +27,7 @@ export const dashBoardDesignerSales = async () => {
   try {
     const designerId = localStorage.getItem("designerId");
     const response = await fetch(
-      `${BASE_URL}/order/total-sales/designer/${designerId}`,
+      `https://indigo-rhapsody-backend-ten.vercel.app/order/total-sales/designer/${designerId}`,
       {
         method: "GET",
         headers: {
@@ -54,7 +53,7 @@ export const dashBoardDesignerProducts = async () => {
   try {
     const designerId = localStorage.getItem("designerId");
     const response = await fetch(
-      `${BASE_URL}/products/total-products/designer/${designerId}`,
+      `https://indigo-rhapsody-backend-ten.vercel.app/products/total-products/designer/${designerId}`,
       {
         method: "GET",
         headers: {
@@ -79,12 +78,15 @@ export const dashBoardDesignerProducts = async () => {
 export const getOrderForTable = async () => {
   try {
     const designerId = localStorage.getItem("designerId");
-    const response = await fetch(`${BASE_URL}/order/designer/${designerId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `https://indigo-rhapsody-backend-ten.vercel.app/order/designer/${designerId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
