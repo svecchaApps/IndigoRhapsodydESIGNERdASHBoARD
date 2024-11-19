@@ -1,18 +1,17 @@
 import { storage } from "../../src/service/firebaseService"; // Import the storage instance
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
+const BASE_URL = process.env.API_BASE_URL;
+
 export const dashBoardDesigner = async () => {
   try {
     const designerId = localStorage.getItem("designerId");
-    const response = await fetch(
-      `https://indigo-rhapsody-backend-ten.vercel.app/designer/${designerId}/details`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await fetch(`${BASE_URL}/designer/${designerId}/details`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -61,16 +60,13 @@ export const updateProfile = async (profileData, logoFile, backgroundFile) => {
       ...(backGroundImage && { backGroundImage }),
     };
 
-    const response = await fetch(
-      `https://indigo-rhapsody-backend-ten.vercel.app/designer/${designerId}/update`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedProfileData),
-      }
-    );
+    const response = await fetch(`${BASE_URL}/designer/${designerId}/update`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedProfileData),
+    });
 
     if (!response.ok) {
       const errorData = await response.json();

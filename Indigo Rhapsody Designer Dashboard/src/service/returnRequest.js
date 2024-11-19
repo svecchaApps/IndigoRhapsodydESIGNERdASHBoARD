@@ -1,8 +1,9 @@
+const BASE_URL = process.env.API_BASE_URL;
 export const getReturnRequest = async () => {
   try {
     const designerId = localStorage.getItem("designerId");
     const response = await fetch(
-      `https://indigo-rhapsody-backend-ten.vercel.app/order/return-requests/${designerId}`,
+      `${BASE_URL}/order/return-requests/${designerId}`,
       {
         method: "GET",
         headers: {
@@ -28,19 +29,16 @@ export const CreateReturnRequest = async (returnId) => {
   try {
     const designerId = localStorage.getItem("designerId"); // Assuming you have stored designerId in local storage
 
-    const response = await fetch(
-      `https://indigo-rhapsody-backend-ten.vercel.app/shipping/createReturn`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          returnId, // Pass the returnId received in the function argument
-          designerRef: designerId, // Pass the designerId as designerRef
-        }),
-      }
-    );
+    const response = await fetch(`${BASE_URL}/shipping/createReturn`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        returnId, // Pass the returnId received in the function argument
+        designerRef: designerId, // Pass the designerId as designerRef
+      }),
+    });
 
     if (!response.ok) {
       const errorData = await response.json();

@@ -1,8 +1,10 @@
+const BASE_URL = process.env.API_BASE_URL;
+
 export const getProductsBydesigner = async () => {
   try {
     const designerId = localStorage.getItem("designerId");
     const response = await fetch(
-      `https://indigo-rhapsody-backend-ten.vercel.app/products/getProductsByDesigner/${designerId}`,
+      `${BASE_URL}/products/getProductsByDesigner/${designerId}`,
       {
         method: "GET",
         headers: {
@@ -26,16 +28,13 @@ export const getProductsBydesigner = async () => {
 
 export const createPassword = async (email, password) => {
   try {
-    const response = await fetch(
-      "https://indigo-rhapsody-backend-ten.vercel.app/products/createProduct",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      }
-    );
+    const response = await fetch(`${BASE_URL}/products/createProduct`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
     if (!response.ok) {
       // Handle HTTP errors
