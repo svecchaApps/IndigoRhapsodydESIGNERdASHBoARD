@@ -136,6 +136,26 @@ const ButtonGroup = styled.div`
   justify-content: space-between;
   margin-top: 20px;
 
+  .spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.6s linear infinite;
+    margin-right: 8px;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   button {
     padding: 10px 20px;
     border: none;
@@ -161,6 +181,7 @@ function AddProductModal({ show, onClose }) {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const designerRef = localStorage.getItem("designerRef");
 
@@ -176,21 +197,17 @@ function AddProductModal({ show, onClose }) {
 
   useEffect(() => {
     if (show) {
-      // Fetch categories when the modal is shown
       const fetchCategories = async () => {
         try {
           const categoryData = await getCategory();
           setCategories(categoryData.categories || []); // Update to match your response structure
-        } catch (error) {
-          // console.error("Failed to fetch categories:", error);
-        }
+        } catch (error) {}
       };
       fetchCategories();
     }
   }, [show]);
   useEffect(() => {
     if (selectedCategory) {
-      // Fetch subcategories when a category is selected
       const fetchSubCategories = async () => {
         try {
           const subCategoryData = await getSubCategory(selectedCategory);
@@ -249,10 +266,18 @@ function AddProductModal({ show, onClose }) {
 
   const handleCoverImageChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (!file) {
+      toast.error("Please select a cover image.");
+      return;
+    }
+
+    try {
       setCoverImage(file);
-      const url = await uploadImageToFirebase(file);
-      setCoverImageUrl(url);
+      const url = await uploadImageToFirebase(file); // Upload to Firebase
+      setCoverImageUrl(url); // Store the URL for API usage
+      toast.success("Cover image uploaded successfully.");
+    } catch (error) {
+      toast.error("Failed to upload cover image. Please try again.");
     }
   };
 
@@ -321,25 +346,52 @@ function AddProductModal({ show, onClose }) {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!coverImage) {
-      toast.error("Cover image is required.");
+
+    if (!formData.productName.trim()) {
+      toast.error("Product Name is required.");
       return;
     }
-    if (!coverImageUrl) {
-      toast.error("Cover image is required.");
+    if (!formData.description.trim()) {
+      toast.error("Description is required.");
+      return;
+    }
+    if (!formData.price || formData.price <= 0) {
+      toast.error("Price must be a positive number.");
+      return;
+    }
+    if (!formData.sku.trim()) {
+      toast.error("SKU is required.");
+      return;
+    }
+    if (!formData.fit.trim()) {
+      toast.error("Fit is required.");
+      return;
+    }
+    if (!formData.fabric.trim()) {
+      toast.error("Fabric is required.");
+      return;
+    }
+    if (!formData.material.trim()) {
+      toast.error("Material is required.");
+      return;
+    }
+    if (!selectedCategory) {
+      toast.error("Category is required.");
+      return;
+    }
+    if (!selectedSubCategory) {
+      toast.error("Subcategory is required.");
       return;
     }
 
+    setIsLoading(true); // Start loading
     try {
       const productData = {
         ...formData,
         category: selectedCategory,
         subCategory: selectedSubCategory,
         variants: variants,
-        coverImage: coverImageUrl,
       };
-
-
 
       const response = await createProduct(productData);
 
@@ -347,8 +399,9 @@ function AddProductModal({ show, onClose }) {
       onClose();
       window.location.reload();
     } catch (error) {
-
       toast.error(`Failed to create product: ${error.message}`);
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
@@ -370,31 +423,6 @@ function AddProductModal({ show, onClose }) {
       <ModalContent>
         <h3>New Product</h3>
         <form onSubmit={handleSubmit}>
-          <FormSection>
-            <h4>Upload Cover Image</h4>
-            <div className="drop-zone">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleCoverImageChange}
-                style={{ display: "none" }}
-                id="coverImageUpload"
-              />
-              <label htmlFor="coverImageUpload">
-                <FaUpload size={30} color="#888" />
-                <p>Drag & drop or click to upload a cover image</p>
-              </label>
-              {coverImage && (
-                <div className="image-preview">
-                  <img
-                    src={URL.createObjectURL(coverImage)}
-                    alt="Cover Preview"
-                  />
-                </div>
-              )}
-            </div>
-          </FormSection>
-
           <FormSection>
             <h4>Variants</h4>
             {variants.map((variant, colorIndex) => (
@@ -626,8 +654,8 @@ function AddProductModal({ show, onClose }) {
             <button type="button" className="cancel" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="save">
-              Save Product
+            <button type="submit" className="save" disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save Product"}
             </button>
           </ButtonGroup>
         </form>

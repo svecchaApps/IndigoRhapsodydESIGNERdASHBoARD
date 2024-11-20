@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { Table, Input, Button, Space, message } from "antd";
+import { SearchOutlined, DownloadOutlined } from "@ant-design/icons";
 import styled from "styled-components";
 import {
   getShippingDetails,
   createInvoice,
 } from "../../service/shippinService";
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
 
 const TableContainer = styled.div`
   padding: 20px;
@@ -14,46 +14,35 @@ const TableContainer = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
-const StyledTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  overflow: hidden;
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 
-  th,
-  td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+  h2 {
+    margin: 0;
   }
 
-  th {
-    background-color: #f4f4f4;
-    font-weight: 600;
-  }
-
-  tr:hover {
-    background-color: #f1f1f1;
-  }
-
-  .action-icons {
-    display: flex;
-    gap: 10px;
-    cursor: pointer;
+  .search-bar {
+    max-width: 300px;
+    width: 100%;
   }
 `;
+
 const ShippingPage = () => {
   const [shippings, setShippings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
     const fetchShippings = async () => {
       try {
         const data = await getShippingDetails();
         setShippings(data.shippings);
+        setFilteredData(data.shippings); // Initialize filtered data
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -67,7 +56,6 @@ const ShippingPage = () => {
   const handleDownloadInvoice = async (shipmentId) => {
     try {
       const invoiceData = await createInvoice(shipmentId);
-
       const invoiceUrl = invoiceData.label_url;
 
       const link = document.createElement("a");
@@ -77,11 +65,56 @@ const ShippingPage = () => {
       link.click();
       document.body.removeChild(link);
 
-      toast.success("Invoice downloaded successfully!");
+      message.success("Invoice downloaded successfully!");
     } catch (err) {
-      toast.error(`Failed to download invoice: ${err.message}`);
+      message.error(`Failed to download invoice: ${err.message}`);
     }
   };
+
+  const handleSearch = (value) => {
+    setSearchText(value);
+    const filtered = shippings.filter(
+      (shipping) =>
+        shipping.order_id.toLowerCase().includes(value.toLowerCase()) ||
+        shipping.shipmentId.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredData(filtered);
+  };
+
+  const columns = [
+    {
+      title: "Order ID",
+      dataIndex: "order_id",
+      key: "order_id",
+    },
+    {
+      title: "Shipment ID",
+      dataIndex: "shipmentId",
+      key: "shipmentId",
+    },
+    {
+      title: "Order Date",
+      dataIndex: "order_date",
+      key: "order_date",
+      render: (text) => new Date(text).toLocaleDateString(),
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <Space size="middle">
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            onClick={() => handleDownloadInvoice(record.shipmentId)}
+          >
+            Download Invoice
+          </Button>
+          <Button type="danger">Delete</Button>
+        </Space>
+      ),
+    },
+  ];
 
   if (loading) {
     return <div>Loading...</div>;
@@ -93,41 +126,22 @@ const ShippingPage = () => {
 
   return (
     <TableContainer>
-      <ToastContainer />
-      <h2>Shipped Orders</h2>
-      <StyledTable>
-        <thead>
-          <tr>
-            <th>Order ID</th>
-            <th>Shipment ID</th>
-            <th>Order Date</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {shippings.map((shipping, index) => (
-            <tr key={index}>
-              <td>{shipping.order_id}</td>
-              <td>{shipping.shipmentId}</td>
-              <td>{new Date(shipping.order_date).toLocaleDateString()}</td>
-              <td>
-                <div className="action-icons">
-                  <span
-                    role="img"
-                    aria-label="download"
-                    onClick={() => handleDownloadInvoice(shipping.shipmentId)}
-                  >
-                    📥
-                  </span>
-                  <span role="img" aria-label="delete">
-                    ❌
-                  </span>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </StyledTable>
+      <Header>
+        <h2>Shipped Orders</h2>
+        <Input
+          className="search-bar"
+          placeholder="Search by Order ID or Shipment ID"
+          value={searchText}
+          onChange={(e) => handleSearch(e.target.value)}
+          prefix={<SearchOutlined />}
+        />
+      </Header>
+      <Table
+        columns={columns}
+        dataSource={filteredData}
+        rowKey={(record) => record.shipmentId}
+        pagination={{ pageSize: 10 }}
+      />
     </TableContainer>
   );
 };

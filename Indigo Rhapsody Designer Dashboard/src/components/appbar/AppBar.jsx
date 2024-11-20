@@ -68,46 +68,6 @@ function AppBar() {
           <h3 className="appbar-title">Dashboard</h3>
         </div>
         <div className="appbar-right">
-          <div className="appbar-search">
-            <form>
-              <div className="input-group" ref={inputControlRef}>
-                <span
-                  className="input-icon"
-                  onClick={handleInputControlVisibility}
-                >
-                  <img
-                    src={Icons.SearchBlue}
-                    alt="Search Icon"
-                    className="input-icon-img"
-                  />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Search Here ..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  className={`input-control ${
-                    showInputControl ? "show-input-control" : ""
-                  }`}
-                />
-                {/* Display suggestions dynamically */}
-                {showInputControl && filteredPages.length > 0 && (
-                  <ul className="search-results">
-                    {filteredPages.map((page, index) => (
-                      <li
-                        key={index}
-                        onClick={() => handlePageClick(page.path)}
-                        className="search-result-item"
-                      >
-                        {page.name}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </form>
-          </div>
-
           {/* Notification Bell Icon */}
           <button className="notification-bell" onClick={toggleNotifications}>
             <MdNotificationsNone size={24} />

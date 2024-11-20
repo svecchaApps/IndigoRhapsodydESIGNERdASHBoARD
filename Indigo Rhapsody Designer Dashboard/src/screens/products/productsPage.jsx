@@ -91,12 +91,6 @@ function ProductsPage() {
       <HeaderRow>
         <h5>Manage Products</h5>
         <div className="button-group">
-          <SearchBar
-            type="text"
-            onChange={handleSearchChange}
-            placeholder="Search Product"
-            value={searchTerm}
-          />
           <button className="add-product" onClick={handleAddProductClick}>
             Add Product +
           </button>
