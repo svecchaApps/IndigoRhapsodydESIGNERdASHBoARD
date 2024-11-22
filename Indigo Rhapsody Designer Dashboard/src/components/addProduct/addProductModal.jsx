@@ -182,6 +182,7 @@ function AddProductModal({ show, onClose }) {
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({}); // Track validation errors
 
   const designerRef = localStorage.getItem("designerRef");
 
@@ -344,8 +345,36 @@ function AddProductModal({ show, onClose }) {
     setImageList((prevImages) => prevImages.filter((_, i) => i !== index));
     setImageUrls((prevUrls) => prevUrls.filter((_, i) => i !== index));
   };
+
+  const validateFields = () => {
+    const newErrors = {};
+
+    // Validate each field
+    if (!formData.productName.trim())
+      newErrors.productName = "Product Name is required.";
+    if (!formData.description.trim())
+      newErrors.description = "Description is required.";
+    if (!formData.price || formData.price <= 0)
+      newErrors.price = "Price must be a positive number.";
+    if (!formData.sku.trim()) newErrors.sku = "SKU is required.";
+    if (!formData.fit.trim()) newErrors.fit = "Fit is required.";
+    if (!formData.fabric.trim()) newErrors.fabric = "Fabric is required.";
+    if (!formData.material.trim()) newErrors.material = "Material is required.";
+    if (!selectedCategory) newErrors.category = "Category is required.";
+    if (!selectedSubCategory)
+      newErrors.subCategory = "SubCategory is required.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateFields()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
 
     if (!formData.productName.trim()) {
       toast.error("Product Name is required.");
@@ -544,6 +573,10 @@ function AddProductModal({ show, onClose }) {
               value={formData.productName}
               onChange={handleInputChange}
             />
+            {errors.productName && (
+              <small className="error-text">{errors.productName}</small>
+            )}
+
             <label>Description</label>
             <textarea
               name="description" // Add this line

@@ -4,7 +4,6 @@ import { createShippingOrder } from "../../service/shippinService";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Styled components (as provided in your original code)
 const ModalHeader = styled.div`
   display: flex;
   justify-content: space-between;
@@ -75,10 +74,13 @@ const ShipOrderModal = ({ show, onClose, order }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    // Allow only integers
+    if (/^\d*$/.test(value)) {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   const handleFormSubmit = async (e) => {
@@ -127,33 +129,33 @@ const ShipOrderModal = ({ show, onClose, order }) => {
           ))}
         </ProductList>
         <Input
-          type="number"
+          type="text" // Changed to "text" to control input using regex
           name="height"
-          placeholder="Height"
+          placeholder="Height (whole number)"
           value={formData.height}
           onChange={handleInputChange}
           required
         />
         <Input
-          type="number"
+          type="text"
           name="weight"
-          placeholder="Weight"
+          placeholder="Weight (whole number)"
           value={formData.weight}
           onChange={handleInputChange}
           required
         />
         <Input
-          type="number"
+          type="text"
           name="length"
-          placeholder="Length"
+          placeholder="Length (whole number)"
           value={formData.length}
           onChange={handleInputChange}
           required
         />
         <Input
-          type="number"
+          type="text"
           name="breadth"
-          placeholder="Breadth"
+          placeholder="Breadth (whole number)"
           value={formData.breadth}
           onChange={handleInputChange}
           required
@@ -179,4 +181,3 @@ const ShipOrderModal = ({ show, onClose, order }) => {
 };
 
 export default ShipOrderModal;
- 
