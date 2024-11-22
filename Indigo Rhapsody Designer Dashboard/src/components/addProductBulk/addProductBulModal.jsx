@@ -89,14 +89,12 @@ function UploadBulkModal({ show, onClose }) {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
-
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     const droppedFile = e.dataTransfer.files[0];
     setFile(droppedFile);
-
   };
 
   const handleDragOver = (e) => {
@@ -104,7 +102,6 @@ function UploadBulkModal({ show, onClose }) {
   };
 
   const handleUpload = async () => {
-
     if (file) {
       setUploading(true);
       setProgress(10); // Initial progress
@@ -141,6 +138,7 @@ function UploadBulkModal({ show, onClose }) {
     >
       <ModalContent>
         <h3>Upload Bulk Products</h3>
+        <h6>This Process May Take Some Time</h6>
         {uploading && (
           <ProgressBar>
             <div className="progress" style={{ width: `${progress}%` }}></div>
