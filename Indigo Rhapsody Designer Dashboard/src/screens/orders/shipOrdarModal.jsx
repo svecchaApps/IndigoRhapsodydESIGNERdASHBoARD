@@ -95,16 +95,25 @@ const ShipOrderModal = ({ show, onClose, order }) => {
       length: formData.length,
       breadth: formData.breadth,
       pickup_Location: displayName,
+      designerRef: localStorage.getItem("designerId"),
     };
 
-    setIsSubmitting(true); // Start loading state
+    setIsSubmitting(true);
 
     try {
       const result = await createShippingOrder(requestBody);
       setResponse(result);
       setError(null);
       toast.success("Shipping order created successfully!");
-      onClose();
+
+      setFormData({
+        height: "",
+        weight: "",
+        length: "",
+        breadth: "",
+      });
+      setResponse(null);
+      onClose(); // Close the modal
     } catch (err) {
       setError(err.message);
       toast.error(`Failed to create shipping order: ${err.message}`);

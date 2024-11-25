@@ -22,7 +22,12 @@ const Header = styled.div`
 
 // Styled component for status
 const Status = styled.span`
-  color: ${(props) => (props.status === "Pending" ? "red" : props.status === "Order-Shipped" ? "green" : "black")};
+  color: ${(props) =>
+    props.status === "Pending"
+      ? "red"
+      : props.status === "Order-Shipped"
+      ? "green"
+      : "black"};
 `;
 
 function OrderScreen() {
@@ -195,10 +200,13 @@ function OrderScreen() {
       <Modal
         title="Ship Order"
         visible={showShipModal}
-        onCancel={() => setShowShipModal(false)}
+        onCancel={() => setShowShipModal(false)} // Handle modal visibility
         footer={null}
       >
-        <ShipOrderModal order={selectedOrder} />
+        <ShipOrderModal
+          order={selectedOrder}
+          onClose={() => setShowShipModal(false)} // Pass the onClose function
+        />
       </Modal>
     </Container>
   );
