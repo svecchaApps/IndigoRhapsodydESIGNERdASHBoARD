@@ -85,6 +85,8 @@ const ShipOrderModal = ({ show, onClose, order }) => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    const userData = localStorage.getItem("userId");
+    const displayName = userData?.displayName;
 
     const requestBody = {
       orderId: order.orderId,
@@ -92,7 +94,7 @@ const ShipOrderModal = ({ show, onClose, order }) => {
       weight: formData.weight,
       length: formData.length,
       breadth: formData.breadth,
-      pickup_Location: localStorage.getItem("designerId"),
+      pickup_Location: displayName,
     };
 
     setIsSubmitting(true); // Start loading state

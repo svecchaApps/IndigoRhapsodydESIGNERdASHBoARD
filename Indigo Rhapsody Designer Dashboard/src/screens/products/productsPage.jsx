@@ -6,6 +6,9 @@ import AddSubCategoryModal from "./addSubCategory"; // Import the modal
 import styled from "styled-components";
 import UploadBulkModal from "../../components/addProductBulk/addProductBulModal";
 import EditVariantModal from "../../components/addProductBulk/editProductBulkModal"; // Import the EditVariantModal
+import { ToastContainer } from "react-toastify";
+
+import "react-toastify/dist/ReactToastify.css";
 
 const HeaderRow = styled.div`
   display: flex;
@@ -88,6 +91,7 @@ function ProductsPage() {
 
   return (
     <RecentOrderWrap className="content-area">
+      <ToastContainer />
       <HeaderRow>
         <h5>Manage Products</h5>
         <div className="button-group">
