@@ -2,13 +2,12 @@ import React from "react";
 import { SidebarWrap } from "./Sidebar.styles";
 import { MdOutlineClose } from "react-icons/md";
 import { Icons } from "../../assets/icons";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSidebarClose } from "../../redux/slices/sidebarSlices";
 import { NavLink } from "react-router-dom";
 import { Images } from "../../assets/images";
-
-
+import { Modal } from "antd";
 
 function Sidebar() {
   const isSidebarOpen = useSelector((state) => state.isSidebarOpen);
@@ -16,8 +15,16 @@ function Sidebar() {
   const navigate = useNavigate();
 
   const handleSignOut = () => {
-    localStorage.clear(); // Clear all localStorage items
-    navigate("/"); // Redirect to the login page
+    Modal.confirm({
+      title: "Are you sure you want to sign out?",
+      content: "This will log you out of the application.",
+      okText: "Yes, Sign Out",
+      cancelText: "Cancel",
+      onOk: () => {
+        localStorage.clear(); // Clear all localStorage items
+        navigate("/"); // Redirect to the login page
+      },
+    });
   };
 
   return (
@@ -103,14 +110,6 @@ function Sidebar() {
                 <span className="menu-link-text">Profile</span>
               </NavLink>
             </li>
-            {/* <li className="menu-item">
-              <NavLink to="/dashboard/notifications" className="menu-link">
-                <span className="menu-link-icon">
-                  <img src={Icons.Message} alt="" />
-                </span>
-                <span className="menu-link-text">Notifications</span>
-              </NavLink>
-            </li> */}
             <li className="menu-item">
               <button onClick={handleSignOut} className="menu-link">
                 <span className="menu-link-icon">
