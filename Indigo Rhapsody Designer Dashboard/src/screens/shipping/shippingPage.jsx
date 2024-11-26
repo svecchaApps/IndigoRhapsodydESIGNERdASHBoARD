@@ -110,8 +110,9 @@ const ShippingPage = () => {
           >
             Download Invoice
           </Button>
-          <Button type="danger">Delete</Button>
         </Space>
+
+        
       ),
     },
   ];
