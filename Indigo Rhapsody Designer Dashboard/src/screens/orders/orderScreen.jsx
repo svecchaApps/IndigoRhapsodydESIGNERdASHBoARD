@@ -85,6 +85,10 @@ function OrderScreen() {
       title: "Order ID",
       dataIndex: "orderId",
       key: "orderId",
+      render:(_,order)=>(
+        <a onClick={() => handleViewOrder(order)}>{order.orderId}</a>
+      )
+      
     },
     {
       title: "Product Names",
