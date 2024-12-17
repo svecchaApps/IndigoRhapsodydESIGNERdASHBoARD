@@ -15,8 +15,7 @@ import ReturnRequest from "./screens/returnRequest/ReturnRequest";
 import ProfileScreen from "./screens/profile/profileScreen";
 import "react-toastify/dist/ReactToastify.css";
 import NotificationScreen from "./screens/notifications/notificationScreen";
-import SignUpScreen from "./screens/signUpScreen/SIgnupScreen";
-// import SignUpScreen from "./screens/signUpScreen/signupScreen";
+import SignupScreen from "./screens/signUpScreen/signupScreen";
 
 const routes = [
   {
@@ -64,7 +63,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<Loginscreen />} /> {/* Default route */}
-          <Route path="/signup" element={<SignUpScreen />} />
+          <Route path="/signup" element={<SignupScreen />} />
           {/* Signup route */}
           <Route
             path="/dashboard"
