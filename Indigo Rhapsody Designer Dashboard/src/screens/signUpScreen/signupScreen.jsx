@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { storage } from "../../service/firebaseService";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
-import "./SignupScreen.css";
+import "./SIgnupScreen.css";
 
 function SignupScreen() {
   const [formData, setFormData] = useState({
