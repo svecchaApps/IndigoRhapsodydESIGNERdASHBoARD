@@ -15,7 +15,7 @@ import ReturnRequest from "./screens/returnRequest/ReturnRequest";
 import ProfileScreen from "./screens/profile/profileScreen";
 import "react-toastify/dist/ReactToastify.css";
 import NotificationScreen from "./screens/notifications/notificationScreen";
-import SignUpScreen from "./screens/signUpScreen/signupScreen";
+import SignUpScreen from "./screens/signUpScreen/SIgnupScreen";
 // import SignUpScreen from "./screens/signUpScreen/signupScreen";
 
 const routes = [
