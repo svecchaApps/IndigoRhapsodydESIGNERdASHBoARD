@@ -12,11 +12,12 @@ function SignupScreen() {
     password: "",
     address: "",
     pincode: "",
+    city: "",
     state: "",
   });
   const [errors, setErrors] = useState({});
-  const [logoURL, setLogoURL] = useState("");
-  const [backgroundURL, setBackgroundURL] = useState("");
+  const [logoUrl, setLogoURL] = useState("");
+  const [backgroundImageUrl, setBackgroundURL] = useState("");
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false); // Modal state
 
@@ -57,30 +58,46 @@ function SignupScreen() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (
       !formData.email ||
       !formData.password ||
-      !logoURL ||
-      !backgroundURL ||
+      !logoUrl ||
+      !backgroundImageUrl ||
       errors.phoneNumber ||
       errors.pincode
     ) {
       alert("Please fill all fields correctly.");
       return;
     }
+
+    const requestBody = { ...formData, logoUrl, backgroundImageUrl };
+
     try {
-      await fetch("https://indigo-rhapsody-backend-ten.vercel.app/user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, logoURL, backgroundURL }),
-      });
-      alert("Sign-up successful!");
-      setShowModal(true); // Show success modal
+      const response = await fetch(
+        "https://indigo-rhapsody-backend-ten.vercel.app/user/user-designer",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      if (response.ok) {
+        console.log("Request Body:", JSON.stringify(requestBody, null, 2));
+        alert("Sign-up successful!");
+        setShowModal(true); // Show success modal only if API is successful
+      } else {
+        const errorData = await response.json();
+        console.error("API Error:", errorData);
+        alert("Error: " + (errorData.message || "Sign-up failed"));
+      }
     } catch (error) {
-      console.error(error);
-      alert("Error during sign-up");
+      console.error("Network Error:", error.message);
+      alert("Error during sign-up. Please try again later.");
     }
   };
+
   const handleContinue = () => {
     navigate("/");
   };
@@ -174,6 +191,17 @@ function SignupScreen() {
               required
             />
             {errors.pincode && <span className="error">{errors.pincode}</span>}
+          </div>
+        </div>
+        <div className="form-section">
+          <div className="input-group">
+            <label>City</label>
+            <input
+              type="text"
+              name="city"
+              placeholder="Enter your City"
+              onChange={handleInputChange}
+            />
           </div>
         </div>
         <div className="form-section">
