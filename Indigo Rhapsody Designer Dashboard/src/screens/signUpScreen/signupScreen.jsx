@@ -14,6 +14,7 @@ function SignupScreen() {
     pincode: "",
     city: "",
     state: "",
+    role: "Designer",
   });
   const [errors, setErrors] = useState({});
   const [logoUrl, setLogoURL] = useState("");
