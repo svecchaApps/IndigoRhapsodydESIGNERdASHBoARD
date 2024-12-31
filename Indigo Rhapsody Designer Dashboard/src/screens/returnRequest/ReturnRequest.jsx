@@ -13,7 +13,7 @@ import {
   CreateReturnRequest,
   DeclineReturnRequest,
 } from "../../service/returnRequest";
-import "./ReturnRequest.css";
+import "./returnRequest.css";
 
 const { Title, Text } = Typography;
 
