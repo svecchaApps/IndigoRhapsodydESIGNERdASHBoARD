@@ -1,7 +1,7 @@
-
 const BASE_URL = "https://indigo-rhapsody-backend-ten.vercel.app";
 
 const designerId = localStorage.getItem("designerId");
+const userId = localStorage.getItem("userId");
 
 export const createShippingOrder = async (shippingDetails) => {
   const response = await fetch(`${BASE_URL}/shipping/createOrder`, {
@@ -51,6 +51,20 @@ export const createInvoice = async (shipmentId) => {
 
 export const getShippingDetails = async (shipmentId) => {
   const response = await fetch(`${BASE_URL}/shipping/designer/${designerId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to get shipping details");
+  }
+  return data;
+};
+
+export const getShippingName = async (shipmentId) => {
+  const response = await fetch(`${BASE_URL}/designer/name/${userId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

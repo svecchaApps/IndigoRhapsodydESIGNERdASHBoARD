@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { createShippingOrder } from "../../service/shippinService";
+import {
+  createShippingOrder,
+  getShippingName,
+} from "../../service/shippinService";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -85,8 +88,10 @@ const ShipOrderModal = ({ show, onClose, order }) => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    const userData = localStorage.getItem("userId");
-    const displayName = userData?.displayName;
+    const shippingNameResponse = await getShippingName();
+    const displayName = shippingNameResponse.designer?.displayName || "Unknown";
+
+    console.log("Display Name:", displayName);
 
     const requestBody = {
       orderId: order.orderId,
@@ -97,6 +102,8 @@ const ShipOrderModal = ({ show, onClose, order }) => {
       pickup_Location: displayName,
       designerRef: localStorage.getItem("designerId"),
     };
+
+    console.log("Request Body:", requestBody);
 
     setIsSubmitting(true);
 

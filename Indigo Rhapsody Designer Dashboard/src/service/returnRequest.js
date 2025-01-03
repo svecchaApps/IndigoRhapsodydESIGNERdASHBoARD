@@ -1,4 +1,3 @@
-
 const BASE_URL = "https://indigo-rhapsody-backend-ten.vercel.app";
 export const getReturnRequest = async () => {
   try {
@@ -38,6 +37,33 @@ export const CreateReturnRequest = async (returnId) => {
       body: JSON.stringify({
         returnId, // Pass the returnId received in the function argument
         designerRef: designerId, // Pass the designerId as designerRef
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to load data");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error creating return request:", error);
+    throw error;
+  }
+};
+
+export const DeclineReturnRequest = async (returnId) => {
+  try {
+    const designerId = localStorage.getItem("designerId"); // Assuming you have stored designerId in local storage
+
+    const response = await fetch(`${BASE_URL}/shipping/rejectRequest`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        returnId,
       }),
     });
 
