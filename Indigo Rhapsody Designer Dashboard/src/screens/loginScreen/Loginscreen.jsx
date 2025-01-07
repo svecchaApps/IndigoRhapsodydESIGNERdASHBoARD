@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import logo from "../../assets/images/Asset_3.webp";
 
 import {
   LoginScreenWrap,
@@ -61,6 +62,14 @@ function Loginscreen() {
     <LoginScreenWrap>
       <LeftSection>
         <FormContainer>
+          <div className="logo-section">
+            <img
+              src={logo}
+              alt="Brand Logo"
+              className="logo"
+              style={{ width: "200px", height: "120px" }}
+            />
+          </div>
           <h1>Welcome Back!</h1>
           <p>Access Your admin panel from here</p>
           <form onSubmit={handleLogin}>
@@ -93,16 +102,6 @@ function Loginscreen() {
           </form>
         </FormContainer>
       </LeftSection>
-      <RightSection>
-        <InfoContainer>
-          <h2>Redefine Your Calendar Experience!</h2>
-          <p>
-            Unshackle yourself from the confines of traditional scheduling and
-            immerse yourself in the boundless convenience that Ofative brings to
-            your daily routine.
-          </p>
-        </InfoContainer>
-      </RightSection>
     </LoginScreenWrap>
   );
 }
