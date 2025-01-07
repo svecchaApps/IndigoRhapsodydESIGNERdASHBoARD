@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { storage } from "../../service/firebaseService";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
-import "./signupscreen.css";
+import "../signUpScreen/signupscreen.css";
 import logo from "../../assets/images/Asset_3.webp";
 
 function SignupScreen() {
