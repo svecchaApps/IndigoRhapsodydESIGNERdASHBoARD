@@ -93,7 +93,7 @@ function ProductsPage() {
     <RecentOrderWrap className="content-area">
       <ToastContainer />
       <HeaderRow>
-        <h5>Manage Products</h5>
+        <h2>Manage Products</h2>
         <div className="button-group">
           <button className="add-product" onClick={handleAddProductClick}>
             Add Product +
