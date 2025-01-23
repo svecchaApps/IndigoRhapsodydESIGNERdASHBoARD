@@ -138,7 +138,7 @@ function UploadBulkModal({ show, onClose }) {
     >
       <ModalContent>
         <h3>Upload Bulk Products</h3>
-        <h6>This Process May Take Some Time</h6>
+        <p>This Process May Take Some Time</p>
         {uploading && (
           <ProgressBar>
             <div className="progress" style={{ width: `${progress}%` }}></div>
@@ -166,7 +166,10 @@ function UploadBulkModal({ show, onClose }) {
         <button
           type="button"
           onClick={handleUpload}
-          style={{ marginTop: "20px", padding: "10px 20px" }}
+          style={{ marginTop: "20px", padding: "10px 20px" ,
+            border: "1px solid #007bff",
+            borderRadius: "5px",
+          }}
           disabled={uploading}
         >
           {uploading ? "Uploading..." : "Upload"}

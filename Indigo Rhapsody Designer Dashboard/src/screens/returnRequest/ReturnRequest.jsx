@@ -142,7 +142,7 @@ const ReturnRequest = () => {
   }
 
   if (error) {
-    return <div style={{ color: "red" }}>Error: {error}</div>;
+    return <div style={{ color: "black", marginLeft: "10px" }}>No data available to show <strong>Return</strong> requests</div>;
   }
 
   return (

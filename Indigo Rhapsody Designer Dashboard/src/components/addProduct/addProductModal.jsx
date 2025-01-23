@@ -58,7 +58,7 @@ const FormSection = styled.div`
   textarea {
     width: 100%;
     padding: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     border-radius: 5px;
     border: 1px solid #ddd;
   }
@@ -68,14 +68,29 @@ const FormSection = styled.div`
     gap: 10px;
     margin-bottom: 10px;
 
-    .add-button {
+    .add-button,
+    .remove-button {
       padding: 0 10px;
       border: none;
       background-color: #28a745;
       color: #fff;
       border-radius: 5px;
       cursor: pointer;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+
+    .remove-button {
+      background-color: #dc3545;
+    }
+  }
+
+  .error-text {
+    color: red;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
   }
 
   .drop-zone {
@@ -136,26 +151,6 @@ const ButtonGroup = styled.div`
   justify-content: space-between;
   margin-top: 20px;
 
-  .spinner {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: white;
-    animation: spin 0.6s linear infinite;
-    margin-right: 8px;
-  }
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   button {
     padding: 10px 20px;
     border: none;
@@ -171,21 +166,24 @@ const ButtonGroup = styled.div`
       background-color: #f0f0f0;
       color: #333;
     }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   }
 `;
 
 function AddProductModal({ show, onClose }) {
   const [coverImage, setCoverImage] = useState(null);
+  const [coverImageUrl, setCoverImageUrl] = useState("");
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
-  const [coverImageUrl, setCoverImageUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({}); // Track validation errors
 
-  const designerRef = localStorage.getItem("designerRef");
-
+  // State to store field values
   const [formData, setFormData] = useState({
     productName: "",
     description: "",
@@ -196,17 +194,35 @@ function AddProductModal({ show, onClose }) {
     material: "",
   });
 
+  // State to store field errors
+  const [errors, setErrors] = useState({});
+
+  // Variants array
+  const [variants, setVariants] = useState([
+    {
+      color: "",
+      sizes: [{ size: "", price: "", stock: "" }],
+      imageList: [],
+    },
+  ]);
+
+  // Fetch Categories on modal open
   useEffect(() => {
     if (show) {
       const fetchCategories = async () => {
         try {
           const categoryData = await getCategory();
-          setCategories(categoryData.categories || []); // Update to match your response structure
-        } catch (error) {}
+          // Adjust to match your API response structure
+          setCategories(categoryData.categories || []);
+        } catch (error) {
+          console.error("Failed to fetch categories:", error);
+        }
       };
       fetchCategories();
     }
   }, [show]);
+
+  // Fetch SubCategories when a category is selected
   useEffect(() => {
     if (selectedCategory) {
       const fetchSubCategories = async () => {
@@ -223,19 +239,38 @@ function AddProductModal({ show, onClose }) {
     }
   }, [selectedCategory]);
 
-  const [variants, setVariants] = useState([
-    {
-      color: "",
-      sizes: [{ size: "", price: "", stock: "" }],
-      imageList: [],
-    },
-  ]);
+  // =========================
+  //        HANDLERS
+  // =========================
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // Variant logic
+  const handleAddColor = () => {
+    setVariants([
+      ...variants,
+      { color: "", sizes: [{ size: "", price: "", stock: "" }], imageList: [] },
+    ]);
+  };
+
+  const handleRemoveColorVariant = (colorIndex) => {
+    const newVariants = [...variants];
+    newVariants.splice(colorIndex, 1);
+    setVariants(newVariants);
+  };
 
   const handleAddSize = (colorIndex) => {
     const newVariants = [...variants];
     newVariants[colorIndex].sizes.push({ size: "", price: "", stock: "" });
     setVariants(newVariants);
   };
+
   const handleRemoveSize = (colorIndex, sizeIndex) => {
     const newVariants = [...variants];
     newVariants[colorIndex].sizes.splice(sizeIndex, 1);
@@ -253,6 +288,8 @@ function AddProductModal({ show, onClose }) {
     }
     setVariants(newVariants);
   };
+
+  // Firebase image upload
   const uploadImageToFirebase = async (file) => {
     try {
       const fileRef = ref(storage, `products/${Date.now()}_${file.name}`);
@@ -260,22 +297,17 @@ function AddProductModal({ show, onClose }) {
       const url = await getDownloadURL(fileRef);
       return url;
     } catch (error) {
-      // console.error("Error uploading image to Firebase:", error);
       throw new Error("Failed to upload image");
     }
   };
 
   const handleCoverImageChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) {
-      toast.error("Please select a cover image.");
-      return;
-    }
-
+    if (!file) return;
     try {
       setCoverImage(file);
-      const url = await uploadImageToFirebase(file); // Upload to Firebase
-      setCoverImageUrl(url); // Store the URL for API usage
+      const url = await uploadImageToFirebase(file);
+      setCoverImageUrl(url);
       toast.success("Cover image uploaded successfully.");
     } catch (error) {
       toast.error("Failed to upload cover image. Please try again.");
@@ -287,8 +319,7 @@ function AddProductModal({ show, onClose }) {
     try {
       const uploadedUrls = await Promise.all(
         files.map(async (file) => {
-          const url = await uploadImageToFirebase(file);
-          return url;
+          return await uploadImageToFirebase(file);
         })
       );
       const newVariants = [...variants];
@@ -298,139 +329,88 @@ function AddProductModal({ show, onClose }) {
       ];
       setVariants(newVariants);
     } catch (error) {
-      // console.error("Error uploading image list:", error);
       alert("Failed to upload some images");
     }
   };
 
   const handleRemoveVariantImage = (colorIndex, imageIndex) => {
     const newVariants = [...variants];
-    newVariants[colorIndex].imageList = newVariants[
-      colorIndex
-    ].imageList.filter((_, i) => i !== imageIndex);
+    newVariants[colorIndex].imageList = newVariants[colorIndex].imageList.filter(
+      (_, i) => i !== imageIndex
+    );
     setVariants(newVariants);
   };
 
-  const handleAddColor = () => {
-    setVariants([
-      ...variants,
-      { color: "", sizes: [{ size: "", price: "", stock: "" }], imageList: [] },
-    ]);
-  };
-
-  const handleImageListChange = async (e) => {
-    const files = Array.from(e.target.files);
-    setImageList(files); // Sets the local image preview
-
-    try {
-      const uploadedUrls = await Promise.all(
-        files.map(async (file) => {
-          const url = await uploadImageToFirebase(file);
-          return url;
-        })
-      );
-      setImageUrls((prevUrls) => [...prevUrls, ...uploadedUrls]);
-    } catch (error) {
-      // console.error("Error uploading image list:", error);
-      alert("Failed to upload some images");
-    }
-  };
-  const handleRemoveColorVariant = (colorIndex) => {
-    const newVariants = [...variants];
-    newVariants.splice(colorIndex, 1);
-    setVariants(newVariants);
-  };
-
-  const handleRemoveImage = (index) => {
-    setImageList((prevImages) => prevImages.filter((_, i) => i !== index));
-    setImageUrls((prevUrls) => prevUrls.filter((_, i) => i !== index));
-  };
-
+  // Validation
   const validateFields = () => {
     const newErrors = {};
 
-    // Validate each field
-    if (!formData.productName.trim())
-      newErrors.productName = "Product Name is required.";
-    if (!formData.description.trim())
-      newErrors.description = "Description is required.";
-    if (!formData.price || formData.price <= 0)
-      newErrors.price = "Price must be a positive number.";
-    if (!formData.sku.trim()) newErrors.sku = "SKU is required.";
-    if (!formData.fit.trim()) newErrors.fit = "Fit is required.";
-    if (!formData.fabric.trim()) newErrors.fabric = "Fabric is required.";
-    if (!formData.material.trim()) newErrors.material = "Material is required.";
-    if (!selectedCategory) newErrors.category = "Category is required.";
-    if (!selectedSubCategory)
-      newErrors.subCategory = "SubCategory is required.";
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (!formData.productName.trim()) {
+      newErrors.productName = "Product Name is required.";
+    }
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required.";
+    }
+    if (!formData.price || formData.price <= 0) {
+      newErrors.price = "Price must be a positive number.";
+    }
+    if (!formData.sku.trim()) {
+      newErrors.sku = "Meta Data is required.";
+    }
+    if (!formData.fit.trim()) {
+      newErrors.fit = "Fit is required.";
+    }
+    if (!formData.fabric.trim()) {
+      newErrors.fabric = "Fabric is required.";
+    }
+    if (!formData.material.trim()) {
+      newErrors.material = "Material is required.";
+    }
+    if (!selectedCategory) {
+      newErrors.category = "Category is required.";
+    }
+    if (!selectedSubCategory) {
+      newErrors.subCategory = "Subcategory is required.";
+    }
+
+    return newErrors;
   };
 
+  // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateFields()) {
-      toast.error("Please fill in all required fields.");
+    const newErrors = validateFields();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
-    if (!formData.productName.trim()) {
-      toast.error("Product Name is required.");
-      return;
-    }
-    if (!formData.description.trim()) {
-      toast.error("Description is required.");
-      return;
-    }
-    if (!formData.price || formData.price <= 0) {
-      toast.error("Price must be a positive number.");
-      return;
-    }
-    if (!formData.sku.trim()) {
-      toast.error("SKU is required.");
-      return;
-    }
-    if (!formData.fit.trim()) {
-      toast.error("Fit is required.");
-      return;
-    }
-    if (!formData.fabric.trim()) {
-      toast.error("Fabric is required.");
-      return;
-    }
-    if (!formData.material.trim()) {
-      toast.error("Material is required.");
-      return;
-    }
-    if (!selectedCategory) {
-      toast.error("Category is required.");
-      return;
-    }
-    if (!selectedSubCategory) {
-      toast.error("Subcategory is required.");
-      return;
-    }
+    setIsLoading(true);
+    setErrors({}); // Clear previous errors
 
-    setIsLoading(true); // Start loading
     try {
       const productData = {
         ...formData,
         category: selectedCategory,
         subCategory: selectedSubCategory,
-        variants: variants,
+        // Optionally include coverImageUrl in productData if your API expects it
+        coverImageUrl,
+        variants,
       };
 
+      // Call your API
       const response = await createProduct(productData);
 
       toast.success("Product created successfully!");
       onClose();
+      // If you want to refresh the page or re-fetch data:
       window.location.reload();
     } catch (error) {
       toast.error(`Failed to create product: ${error.message}`);
     } finally {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
     }
   };
 
@@ -439,25 +419,23 @@ function AddProductModal({ show, onClose }) {
       onClose();
     }
   };
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
 
   return (
     <ModalOverlay show={show} onClick={handleOverlayClick}>
       <ModalContent>
+        {/* Toast for final success/error; can be placed here or in a higher component */}
+        <ToastContainer />
+
         <h3>New Product</h3>
         <form onSubmit={handleSubmit}>
+          {/* =============== VARIANTS SECTION =============== */}
           <FormSection>
             <h4>Variants</h4>
             {variants.map((variant, colorIndex) => (
-              <div key={colorIndex}>
+              <div key={colorIndex} style={{ marginBottom: "15px" }}>
+                {/* Color Field */}
                 <div className="input-group">
-                  <label>Color</label>
+                  <label style={{ width: "60px" }}>Color</label>
                   <input
                     type="text"
                     placeholder="Color"
@@ -466,16 +444,19 @@ function AddProductModal({ show, onClose }) {
                       handleVariantChange(e, colorIndex, null, "color")
                     }
                   />
-                  <button
-                    type="button"
-                    className="remove-button"
-                    onClick={() => handleRemoveColorVariant(colorIndex)}
-                  >
-                    -
-                  </button>
+                  {variants.length > 1 && (
+                    <button
+                      type="button"
+                      className="remove-button"
+                      onClick={() => handleRemoveColorVariant(colorIndex)}
+                    >
+                      Remove Color
+                    </button>
+                  )}
                 </div>
 
-                <label>Upload Images for {variant.color}</label>
+                {/* Upload Images */}
+                <label>Upload Images for {variant.color || "this color"}</label>
                 <div className="drop-zone">
                   <input
                     type="file"
@@ -485,18 +466,23 @@ function AddProductModal({ show, onClose }) {
                     style={{ display: "none" }}
                     id={`variantImageUpload-${colorIndex}`}
                   />
-                  <label htmlFor={`variantImageUpload-${colorIndex}`}>
+                  <label
+                    htmlFor={`variantImageUpload-${colorIndex}`}
+                    style={{ cursor: "pointer" }}
+                  >
                     <FaUpload size={30} color="#888" />
                     <p>Drag & drop or click to upload images</p>
                   </label>
                 </div>
+
+                {/* Preview Images */}
                 {variant.imageList.length > 0 && (
                   <div className="image-preview">
                     {variant.imageList.map((url, imageIndex) => (
                       <div className="image-container" key={imageIndex}>
                         <img
                           src={url}
-                          alt={`Variant ${colorIndex} Image ${imageIndex}`}
+                          alt={`Variant ${colorIndex} - Image ${imageIndex}`}
                         />
                         <button
                           className="remove-btn"
@@ -511,6 +497,7 @@ function AddProductModal({ show, onClose }) {
                   </div>
                 )}
 
+                {/* Size/Price/Stock Fields */}
                 {variant.sizes.map((size, sizeIndex) => (
                   <div key={sizeIndex} className="input-group">
                     <input
@@ -537,122 +524,166 @@ function AddProductModal({ show, onClose }) {
                         handleVariantChange(e, colorIndex, sizeIndex, "stock")
                       }
                     />
-                    <button
-                      type="button"
-                      className="add-button"
-                      onClick={() => handleAddSize(colorIndex)}
-                    >
-                      +
-                    </button>
-                    <button
-                      type="button"
-                      className="remove-button"
-                      onClick={() => handleRemoveSize(colorIndex, sizeIndex)}
-                    >
-                      -
-                    </button>
+                    {sizeIndex === variant.sizes.length - 1 && (
+                      <button
+                        type="button"
+                        className="add-button"
+                        onClick={() => handleAddSize(colorIndex)}
+                      >
+                        + Size
+                      </button>
+                    )}
+                    {variant.sizes.length > 1 && (
+                      <button
+                        type="button"
+                        className="remove-button"
+                        onClick={() => handleRemoveSize(colorIndex, sizeIndex)}
+                      >
+                        - Size
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
             ))}
-            <button
-              type="button"
-              className="add-button"
-              onClick={handleAddColor}
-            >
+            <button type="button" className="add-button" onClick={handleAddColor}>
               + Add Color
             </button>
           </FormSection>
+
+          {/* =============== COVER IMAGE SECTION (Optional) =============== */}
+          <FormSection>
+            <h4>Cover Image (Optional)</h4>
+            <div className="drop-zone">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCoverImageChange}
+                style={{ display: "none" }}
+                id="coverImageUpload"
+              />
+              <label htmlFor="coverImageUpload" style={{ cursor: "pointer" }}>
+                <FaUpload size={30} color="#888" />
+                <p>Drag & drop or click to upload cover image</p>
+              </label>
+            </div>
+            {coverImageUrl && (
+              <div style={{ marginTop: "10px" }}>
+                <img
+                  src={coverImageUrl}
+                  alt="Cover"
+                  style={{ width: "70px", height: "70px", objectFit: "cover" }}
+                />
+              </div>
+            )}
+          </FormSection>
+
+          {/* =============== GENERAL INFO =============== */}
           <FormSection>
             <h4>General Information</h4>
             <label>Product Name</label>
             <input
               type="text"
-              name="productName" // Add this line
+              name="productName"
               placeholder="Enter product name"
               value={formData.productName}
               onChange={handleInputChange}
             />
             {errors.productName && (
-              <small className="error-text">{errors.productName}</small>
+              <div className="error-text">{errors.productName}</div>
             )}
 
             <label>Description</label>
             <textarea
-              name="description" // Add this line
+              name="description"
               placeholder="Enter product description"
               value={formData.description}
               onChange={handleInputChange}
               rows="3"
             ></textarea>
+            {errors.description && (
+              <div className="error-text">{errors.description}</div>
+            )}
           </FormSection>
 
+          {/* =============== PRICE =============== */}
           <FormSection>
             <h4>Price</h4>
             <div className="input-group">
               <input
                 type="number"
-                name="price" // Add this line
+                name="price"
                 placeholder="Base Price"
                 value={formData.price}
                 onChange={handleInputChange}
               />
-              {/* Add additional inputs if necessary */}
             </div>
+            {errors.price && <div className="error-text">{errors.price}</div>}
           </FormSection>
 
+          {/* =============== META DATA =============== */}
           <FormSection>
             <h4>Meta data</h4>
             <div className="input-group">
               <input
                 type="text"
-                name="sku" // Add this line
+                name="sku"
                 placeholder="SKU"
                 value={formData.sku}
                 onChange={handleInputChange}
               />
             </div>
+            {errors.sku && <div className="error-text">{errors.sku}</div>}
           </FormSection>
 
+          {/* =============== FIT =============== */}
           <FormSection>
             <h4>Fit</h4>
             <div className="input-group">
               <input
                 type="text"
-                name="fit" // Add this line
+                name="fit"
                 placeholder="Fit-Product"
                 value={formData.fit}
                 onChange={handleInputChange}
               />
             </div>
+            {errors.fit && <div className="error-text">{errors.fit}</div>}
           </FormSection>
 
+          {/* =============== FABRIC =============== */}
           <FormSection>
             <h4>Fabric</h4>
             <div className="input-group">
               <input
                 type="text"
-                name="fabric" // Add this line
+                name="fabric"
                 placeholder="Fabric Type"
                 value={formData.fabric}
                 onChange={handleInputChange}
               />
             </div>
+            {errors.fabric && <div className="error-text">{errors.fabric}</div>}
           </FormSection>
 
+          {/* =============== MATERIAL =============== */}
           <FormSection>
             <h4>Material</h4>
             <div className="input-group">
               <input
                 type="text"
-                name="material" // Add this line
+                name="material"
                 placeholder="Material Type"
                 value={formData.material}
                 onChange={handleInputChange}
               />
             </div>
+            {errors.material && (
+              <div className="error-text">{errors.material}</div>
+            )}
           </FormSection>
 
+          {/* =============== CATEGORY =============== */}
           <FormSection>
             <h4>Category</h4>
             <select
@@ -666,8 +697,12 @@ function AddProductModal({ show, onClose }) {
                 </option>
               ))}
             </select>
+            {errors.category && (
+              <div className="error-text">{errors.category}</div>
+            )}
           </FormSection>
 
+          {/* =============== SUBCATEGORY =============== */}
           <FormSection>
             <h4>SubCategory</h4>
             <select
@@ -682,7 +717,7 @@ function AddProductModal({ show, onClose }) {
               ))}
             </select>
           </FormSection>
-
+          {/* =============== BUTTON GROUP =============== */}
           <ButtonGroup>
             <button type="button" className="cancel" onClick={onClose}>
               Cancel
