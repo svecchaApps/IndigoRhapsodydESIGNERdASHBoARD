@@ -129,7 +129,7 @@ function RecentOrdersTable() {
       {loading ? (
         <p>Loading...</p>
       ) : error ? (
-        <p>Error: {error}</p>
+        <p>No <strong>Orders</strong> found yet</p>
       ) : (
         <Table
           columns={columns}

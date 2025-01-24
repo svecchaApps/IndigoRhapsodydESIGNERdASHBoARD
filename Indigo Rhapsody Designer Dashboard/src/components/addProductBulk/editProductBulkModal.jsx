@@ -167,7 +167,10 @@ function EditVariantModal({ show, onClose }) {
         <Button
           type="button"
           onClick={handleUpload}
-          style={{ marginTop: "20px", padding: "10px 20px" }}
+          style={{ marginTop: "20px", padding: "10px 20px",
+            border: "1px solid #007bff",
+            borderRadius: "5px",
+          }}
           disabled={uploading}
         >
           {uploading ? "Uploading..." : "Upload"}

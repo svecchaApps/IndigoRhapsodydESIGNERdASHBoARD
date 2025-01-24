@@ -102,7 +102,9 @@ const AddSubCategoryModal = ({ visible, onClose }) => {
         >
           <Input placeholder="Enter subcategory name" />
         </Form.Item>
-        <Form.Item label="Upload Image">
+        <Form.Item label="Upload Image"
+        rules={[{ required: true, message: "Please upload an image" }]}
+        >
           <div>
             <Upload
               beforeUpload={() => false} // Prevent automatic upload by Ant Design

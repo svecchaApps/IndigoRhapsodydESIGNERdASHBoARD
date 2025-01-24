@@ -185,7 +185,7 @@ const ProductsTable = () => {
         />
       </div>
 
-      {error && <p style={{ color: "red" }}>Error: {error}</p>}
+      {error && <p style={{ color: "red" }}> {error}</p>}
 
       <Table
         columns={columns}
