@@ -20,7 +20,7 @@ const Header = styled.div`
   align-items: center;
   margin-bottom: 20px;
 
-  h2 {
+  h2 { 
     margin: 0;
   }
 
@@ -122,7 +122,7 @@ const ShippingPage = () => {
   }
 
   if (error) {
-    return <div style={{ color: "red" }}>Error: {error}</div>;
+    return <div style={{ color: "black", marginLeft: "10px" }}>No data available to show <strong>Shipping Details</strong>.</div>;
   }
 
   return (

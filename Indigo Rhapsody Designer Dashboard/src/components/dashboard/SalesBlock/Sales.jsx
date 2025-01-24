@@ -19,10 +19,10 @@ const Sales = () => {
     const fetchProducts = async () => {
       try {
         const productsResponse = await dashBoardDesignerProducts();
-
         setProductsData(productsResponse);
       } catch (error) {
         console.error("Error fetching products:", error.message);
+        setProductsData({ totalProducts: 0 }); // Default to 0 on error
       }
     };
 
@@ -32,6 +32,7 @@ const Sales = () => {
         setOrdersData(ordersResponse);
       } catch (error) {
         console.error("Error fetching orders:", error.message);
+        setOrdersData({ totalOrders: 0 }); // Default to 0 on error
       }
     };
 
@@ -41,6 +42,7 @@ const Sales = () => {
         setSalesData(salesResponse);
       } catch (error) {
         console.error("Error fetching sales:", error.message);
+        setSalesData({ totalSalesAmount: 0 }); // Default to 0 on error
       }
     };
 
@@ -87,7 +89,7 @@ const Sales = () => {
                 <img src={Icons.CardOrder} alt="Orders Icon" />
               </div>
               <div className="card-item-value">
-                {ordersData ? ordersData.totalOrders : "Error fetching orders"}
+                {ordersData?.totalOrders ?? 0}
               </div>
               <p className="card-item-text text">Total Orders</p>
               <span className="card-item-sm-text">orders</span>
@@ -97,9 +99,7 @@ const Sales = () => {
                 <img src={Icons.CardSales} alt="Sales Icon" />
               </div>
               <div className="card-item-value">
-                {salesData
-                  ? `₹ ${salesData.totalSalesAmount}`
-                  : "Error fetching sales"}
+                ₹ {salesData?.totalSalesAmount ?? 0}
               </div>
               <p className="card-item-text text">Total Sales</p>
               <span className="card-item-sm-text">sales</span>
@@ -109,9 +109,7 @@ const Sales = () => {
                 <img src={Icons.CardProduct} alt="Products Icon" />
               </div>
               <div className="card-item-value">
-                {productsData
-                  ? productsData.totalProducts
-                  : "Error fetching products"}
+                {productsData?.totalProducts ?? 0}
               </div>
               <p className="card-item-text text">Total Products</p>
               <span className="card-item-sm-text">products</span>

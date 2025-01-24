@@ -168,7 +168,7 @@ function OrderScreen() {
       {loading ? (
         <p>Loading...</p>
       ) : error ? (
-        <p>Error: {error}</p>
+        <p>No <strong>Orders</strong> found</p>
       ) : (
         <>
           <Table
