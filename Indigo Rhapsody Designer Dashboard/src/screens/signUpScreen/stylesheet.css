@@ -49,6 +49,9 @@
   align-items: center; /* Horizontally center the content */
   margin-bottom: 2rem;
 }
+.signup-title {
+  color: rgb(129, 129, 129);
+}
 
 .logo {
   width: 100px;
@@ -92,12 +95,12 @@
 }
 
 .signup-form {
-  background: #fff;
+  /* background: #fff; */
   border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
   width: 100%;
-  max-width: 600px;
+  max-width: 550px;
   z-index: 1;
 }
 
@@ -107,15 +110,16 @@
 
 .input-group label {
   display: block;
+  font-size: 0.9rem;
   margin-bottom: 0.5rem;
-  font-weight: 600;
+  font-weight: 300;
 }
 
 .input-group input {
   width: 100%;
   padding: 0.8rem;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 10px;
   font-size: 1rem;
 }
 
