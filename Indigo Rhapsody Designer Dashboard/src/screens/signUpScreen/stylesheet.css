@@ -1,104 +1,185 @@
+/* Overall container */
 .signup-container {
+  position: relative; /* Needed for the background circles pseudo-elements */
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2rem;
   font-family: "Poppins", sans-serif;
   background: linear-gradient(270deg, #fff 0%, rgba(255, 255, 255, 0.07) 100%);
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 10%;
-    left: 15%;
-    width: 200px;
-    height: 200px;
-    background: rgba(106, 17, 203, 0.5);
-    filter: blur(100px);
-    border-radius: 50%;
-    z-index: 0;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: 20%;
-    right: 10%;
-    width: 300px;
-    height: 300px;
-    background: rgba(119, 151, 255, 0.9);
-    filter: blur(150px);
-    border-radius: 50%;
-    z-index: 0;
-  }
 }
 
-/* .signup-header {
-  text-align: center;
-  margin-bottom: 2rem;
+.signup-container::before {
+  content: "";
+  position: absolute;
+  top: 10%;
+  left: 15%;
+  width: 200px;
+  height: 200px;
+  background: rgba(106, 17, 203, 0.5);
+  filter: blur(100px);
+  border-radius: 50%;
+  z-index: 0;
 }
 
-.logo {
-  width: 100px;
-  margin-bottom: 1rem;
-} */
+.signup-container::after {
+  content: "";
+  position: absolute;
+  bottom: 20%;
+  right: 10%;
+  width: 300px;
+  height: 300px;
+  background: rgba(119, 151, 255, 0.9);
+  filter: blur(150px);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.signup-modal{
+  width: 60%;
+  margin: auto;
+}
+
+/* Header */
 .signup-header {
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Vertically center the content */
-  align-items: center; /* Horizontally center the content */
+  /* text-align: right; */
+  text-align: right; 
   margin-bottom: 2rem;
+  z-index: 1; /* Above background circles */
+  width: 60%;
+  margin-right: 100px;
+  
+  @media screen and (max-width: 768px) {
+    text-align: right;
+    margin-bottom: 1rem;
+    
+    
+  }
+  @media screen and (max-width: 980px) {
+    text-align: right;
+   
+    
+  }
 }
 
 .logo {
   width: 100px;
   margin-bottom: 1rem;
+  /* padding:1rem; */
+/* margin-left: 120px;
+margin-top: 50px; */
 }
 
+/* Main container: progress bar (left) + form (right) */
+.main-content {
+  display: flex;
+  justify-content: flex-start; /* Keep items left-aligned, or center if you prefer */
+  align-items: flex-start;
+  width: 100%;
+  max-width: 900px; 
+  margin: 0 auto;    /* Center horizontally */
+  z-index: 1;       /* Above background circles */
+}
+
+/* Vertical progress bar */
 .progress-bar {
   display: flex;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 600px;
-  margin: 1rem auto;
-}
-
-.step {
-  flex: 1;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #bbb;
+  flex-direction: column;
+  gap: 4rem;
+  align-items: flex-end; /* Center-align the steps */
+  width: 50%;
+  padding: 30px;
   position: relative;
 }
 
+.step {
+  /* display: flex;
+  flex-direction: row;
+  align-items: center; */
+
+display: grid;
+grid-template-columns: 1fr 1fr;
+  position: relative;
+  font-size: 1rem;
+  color: #bbb; /* Default color for inactive steps */
+  transition: color 0.3s ease;
+}
+
 .step.active {
-  color: rgba(119, 151, 255, 0.9);
+  color: #5b68ff; /* Active color */
+}
+
+.step .circle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  margin-right: 40px;
+  border: 2px solid #bbb;
+  border-radius: 50%;
+  background-color: #fff;
   font-weight: bold;
+  color: #bbb;
+  transition: border-color 0.3s ease, color 0.3s ease;
 }
 
-.step::before {
+.step.active .circle {
+  border-color: #5b68ff;
+  color: #fff;
+  background-color: #5b68ff; /* Filled circle for active steps */
+}
+
+.step .label {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.step::after {
   content: "";
-  width: 100%;
-  height: 4px;
-  background-color: #ddd;
   position: absolute;
-  top: -10px;
-  left: 0;
-  z-index: 1;
+  top: 50%;
+  left: 20px;
+  width: 2px;
+  height: 100px;
+  background-color: #bbb; /* Default line color */
+  z-index: -1; /* Place it behind the steps */
+  transition: background-color 0.3s ease;
 }
 
-.step.active::before {
-  background-color: rgba(119, 151, 255, 0.9);
+.step.active::after {
+  background-color: #5b68ff; /* Line color for active steps */
 }
 
+.step:last-child::after {
+  display: none; /* Remove the line after the last step */
+}
+
+
+
+
+/* Form container to the right */
+.form-container {
+  flex: 1;
+  width: 40%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Form styles */
 .signup-form {
-  background: #fff;
+  /* background: #fff; */
   border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-left: 20px;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
   width: 100%;
-  max-width: 600px;
-  z-index: 1;
+
+}
+
+.step-content {
+  margin-bottom: 1rem;
 }
 
 .input-group {
@@ -114,26 +195,42 @@
 .input-group input {
   width: 100%;
   padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid rgb(177, 177, 246);
+  border-radius: 40px;
   font-size: 1rem;
+
+  
+}
+
+/* Error message in red */
+.error {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 0.5rem; /* small spacing above error text */
 }
 
 .form-action {
   display: flex;
   justify-content: space-between;
   margin-top: 1.5rem;
+  gap: 20px;
+  @media screen and (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 1.5rem;
+  }
 }
 
 .back-btn,
 .next-btn,
 .submit-btn {
+  width: 100%;
   padding: 0.8rem 1.5rem;
   border: none;
-  background: rgba(119, 151, 255, 0.9);
+  background: #323FA4;
   color: #fff;
   font-size: 1rem;
-  border-radius: 4px;
+  border-radius: 40px;
   cursor: pointer;
   transition: background 0.3s ease-in-out;
 }
@@ -141,9 +238,10 @@
 .back-btn:hover,
 .next-btn:hover,
 .submit-btn:hover {
-  background: rgba(106, 17, 203, 0.5);
+  background: rgba(71, 2, 145, 0.5);
 }
 
+/* Success Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -162,4 +260,57 @@
   padding: 2rem;
   border-radius: 8px;
   text-align: center;
+}
+
+.success-icon {
+  font-size: 3rem;
+  color: green;
+  margin-bottom: 1rem;
+}
+
+.modal-btn {
+  margin-top: 1rem;
+  background: rgba(119, 151, 255, 0.9);
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+
+/* Drag-and-Drop Area Styling */
+.drop-zone {
+  border: 2px dashed #bbb;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.drop-zone.drag-over {
+  background-color: #f0f8ff;
+  border-color: #007bff;
+}
+
+.drop-zone input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.drop-zone p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.drop-zone.drag-over p {
+  color: #007bff;
 }

@@ -121,12 +121,13 @@ export const FormContainer = styled.div`
       width: 100%;
       padding: 12px 16px;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 20px;
       font-size: 14px;
       outline: none;
 
       &:focus {
-        border-color: #2c54ea;
+      border: 1px solid rgb(15, 57, 209);
+        border-color:rgb(15, 57, 209);
       }
     }
   }
@@ -137,7 +138,7 @@ export const FormContainer = styled.div`
     background-color: ${(props) => props.theme.colors.blue};
     color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 20px;
     font-size: 16px;
     cursor: pointer;
     margin-bottom: 16px;
