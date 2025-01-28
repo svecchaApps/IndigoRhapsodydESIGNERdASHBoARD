@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import {
   createShippingOrder,
-  getShippingName,
-} from "../../service/shippinService";
+  getPickupLocationName,
+} from "../../service/shippinService"; // Updated to use the new endpoint
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -62,6 +62,7 @@ const ProductList = styled.ul`
 const ProductItem = styled.li`
   margin-bottom: 10px;
 `;
+
 const ShipOrderModal = ({ show, onClose, order }) => {
   const [formData, setFormData] = useState({
     height: "",
@@ -71,13 +72,12 @@ const ShipOrderModal = ({ show, onClose, order }) => {
   });
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // New loading state
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!order) return null;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    // Allow only integers
     if (/^\d*$/.test(value)) {
       setFormData((prevData) => ({
         ...prevData,
@@ -88,26 +88,31 @@ const ShipOrderModal = ({ show, onClose, order }) => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    const shippingNameResponse = await getShippingName();
-    const displayName = shippingNameResponse.designer?.displayName || "Unknown";
-
-    console.log("Display Name:", displayName);
-
-    const requestBody = {
-      orderId: order.orderId,
-      height: formData.height,
-      weight: formData.weight,
-      length: formData.length,
-      breadth: formData.breadth,
-      pickup_Location: displayName,
-      designerRef: localStorage.getItem("designerId"),
-    };
-
-    console.log("Request Body:", requestBody);
-
     setIsSubmitting(true);
 
     try {
+      const designerRef = localStorage.getItem("designerId");
+
+      // Fetch pickup location name using the new endpoint
+      const pickupLocationResponse = await getPickupLocationName(
+        localStorage.getItem("designerId")
+      );
+      const pickupLocationName = pickupLocationResponse.pickup_location_name;
+
+      console.log("Pickup Location Name:", pickupLocationName);
+
+      const requestBody = {
+        orderId: order.orderId,
+        height: formData.height,
+        weight: formData.weight,
+        length: formData.length,
+        breadth: formData.breadth,
+        pickup_Location: pickupLocationName,
+        designerRef: designerRef,
+      };
+
+      console.log("Request Body:", requestBody);
+
       const result = await createShippingOrder(requestBody);
       setResponse(result);
       setError(null);
@@ -125,7 +130,7 @@ const ShipOrderModal = ({ show, onClose, order }) => {
       setError(err.message);
       toast.error(`Failed to create shipping order: ${err.message}`);
     } finally {
-      setIsSubmitting(false); // End loading state
+      setIsSubmitting(false);
     }
   };
 
@@ -147,7 +152,7 @@ const ShipOrderModal = ({ show, onClose, order }) => {
           ))}
         </ProductList>
         <Input
-          type="text" // Changed to "text" to control input using regex
+          type="text"
           name="height"
           placeholder="Height (whole number)"
           value={formData.height}
