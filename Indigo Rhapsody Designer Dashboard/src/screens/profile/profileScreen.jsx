@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { dashBoardDesigner, updateProfile } from "../../service/userProfile"; // Import your API function
+import {
+  dashBoardDesigner,
+  updateProfile,
+  updateProfileRequest,
+} from "../../service/userProfile"; // Import your API function
 import { storage } from "../../service/firebaseService"; // Import the storage instance
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -189,6 +193,7 @@ const ProfileScreen = () => {
   const [logoFile, setLogoFile] = useState(null);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [backgroundFile, setBackgroundFile] = useState(null);
 
   useEffect(() => {
     const fetchDesignerDetails = async () => {
@@ -240,12 +245,12 @@ const ProfileScreen = () => {
         updatedLogoUrl = await uploadImageToFirebase(logoFile, "Logo");
       }
 
-      //   if (backgroundFile) {
-      //     updatedBackgroundUrl = await uploadImageToFirebase(
-      //       backgroundFile,
-      //       "Background"
-      //     );
-      //   }
+      if (backgroundFile) {
+        updatedBackgroundUrl = await uploadImageToFirebase(
+          backgroundFile,
+          "Background"
+        );
+      }
 
       const updatedData = {
         ...formData,
@@ -253,17 +258,13 @@ const ProfileScreen = () => {
         backGroundImage: updatedBackgroundUrl,
       };
 
-      await updateProfile(updatedData);
-      // alert("Profile updated successfully!");
+      await updateProfileRequest(updatedData, logoFile, backgroundFile);
       setIsModalOpen(false);
-      // Optionally refresh the data after the update
-      const updatedDesignerData = await dashBoardDesigner();
-      setDesigner(updatedDesignerData.designer);
-      toast.success("Product created successfully!");
+
+      // Notify user of success
+      alert("Profile updated successfully!");
     } catch (error) {
-      // console.error("Error updating profile:", error);
-      toast.error(`Failed to create product: ${error.message}`);
-      // alert("Failed to update profile.");
+      console.error("Error submitting profile update request:", error);
     }
   };
 
@@ -370,6 +371,33 @@ const ProfileScreen = () => {
                   type="text"
                   name="address"
                   value={formData.address || ""}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="full-width">
+                <label>City</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city || ""}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="full-width">
+                <label>State</label>
+                <input
+                  type="text"
+                  name="state"
+                  value={formData.state || ""}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="full-width">
+                <label>Pincode</label>
+                <input
+                  type="text"
+                  name="pincode"
+                  value={formData.pincode || ""}
                   onChange={handleInputChange}
                 />
               </div>

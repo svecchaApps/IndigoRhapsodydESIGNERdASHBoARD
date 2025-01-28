@@ -2,6 +2,7 @@ const BASE_URL = "https://indigo-rhapsody-backend-ten.vercel.app";
 
 const designerId = localStorage.getItem("designerId");
 const userId = localStorage.getItem("userId");
+import axios from "axios";
 
 export const createShippingOrder = async (shippingDetails) => {
   const response = await fetch(`${BASE_URL}/shipping/createOrder`, {
@@ -47,6 +48,13 @@ export const createInvoice = async (shipmentId) => {
     throw new Error(data.error || "Failed to create invoice");
   }
   return data;
+};
+
+export const getPickupLocationName = async (designerRef) => {
+  const response = await axios.get(
+    `${BASE_URL}/designer/${designerRef}/pickup-location`
+  );
+  return response.data;
 };
 
 export const getShippingDetails = async (shipmentId) => {

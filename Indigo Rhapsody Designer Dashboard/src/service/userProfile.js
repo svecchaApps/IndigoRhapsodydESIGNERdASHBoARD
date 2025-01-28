@@ -36,6 +36,62 @@ const uploadImageToFirebase = async (file) => {
   }
 };
 
+export const updateProfileRequest = async (
+  profileData,
+  logoFile,
+  backgroundFile
+) => {
+  try {
+    const designerId = localStorage.getItem("designerId");
+
+    // Upload images to Firebase if provided
+    let logoUrl = profileData.logoUrl || null;
+    let backGroundImage = profileData.backGroundImage || null;
+
+    if (logoFile) {
+      logoUrl = await uploadImageToFirebase(logoFile, "Logo");
+    }
+
+    if (backgroundFile) {
+      backGroundImage = await uploadImageToFirebase(
+        backgroundFile,
+        "Background"
+      );
+    }
+
+    // Prepare payload with updated URLs if provided
+    const updatedProfileData = {
+      ...profileData,
+      ...(logoUrl && { logoUrl }),
+      ...(backGroundImage && { backGroundImage }),
+    };
+
+    const response = await fetch(
+      `${BASE_URL}/designer/${designerId}/update-request`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ updates: updatedProfileData }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || "Failed to submit profile update request"
+      );
+    }
+
+    const data = await response.json();
+    return data; // Return the update request details
+  } catch (error) {
+    console.error("Error submitting profile update request:", error);
+    throw error; // Rethrow the error to be handled by the UI
+  }
+};
+
 export const updateProfile = async (profileData, logoFile, backgroundFile) => {
   try {
     const designerId = localStorage.getItem("designerId");
