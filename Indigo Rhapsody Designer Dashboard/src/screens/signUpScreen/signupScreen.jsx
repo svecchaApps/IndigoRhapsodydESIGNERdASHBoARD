@@ -396,6 +396,7 @@ function SignupScreen() {
                     value={formData.state}
                     onChange={handleInputChange}
                   />
+                  
                   {errors.state && (
                     <span className="error">{errors.state}</span>
                   )}
