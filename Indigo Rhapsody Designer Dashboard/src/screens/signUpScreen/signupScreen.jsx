@@ -1,16 +1,9 @@
-import React, { useState, useEffect } from "react";
-import Select from "react-select";
-import { storage } from "../../service/firebaseService";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../../service/firebaseService"; // Adjust import to match your file structure
+import logo from "../../assets/images/logo.webp";
 import "./stylesheet.css";
-import logo from "../../assets/images/Asset_3.webp";
-
-// Universal Tutorial endpoints
-const UT_BASE_URL = "https://www.universal-tutorial.com/api";
-const AUTH_TOKEN =
-  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfZW1haWwiOiJyYWphdGppZWRtQGdtYWlsLmNvbSIsImFwaV90b2tlbiI6IjlGNnhKQnZzWmt5TzBEclNNaXMyMThFWkNBdEhZaERTLTBmaC1GcDljbl9fU3JyajRlYXBWSmtlR1FqczQ1dUxyNXMifSwiZXhwIjoxNzM3NTM3Njg3fQ.pq1tZUKH515al7o_Rq-lnYyj7t2tWOuSMjZxqOIL8r8";
-// Replace with your actual Bearer token if different
 
 function SignupScreen() {
   const [step, setStep] = useState(1);
@@ -19,30 +12,26 @@ function SignupScreen() {
     phoneNumber: "",
     email: "",
     password: "",
+    // Additional Fields
+    is_creator: true,
+    shortDescription: "",
+    about: "",
+    role: "Designer",
+
+    // For images
+    logoUrl: "",
+    backgroundImageUrl: "",
+
+    // Address fields
+    addressNickname: "Home", // By default "Home"
     address: "",
     pincode: "",
     city: "",
     state: "",
-    role: "Designer",
-    logoUrl: "",
-    backgroundImageUrl: "",
   });
 
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
-
-  // ----- For Select Fields -----
-  // States
-  const [statesOptions, setStatesOptions] = useState([]); // All states from UT
-  const [selectedState, setSelectedState] = useState(null); // Selected state
-
-  // Cities
-  const [citiesOptions, setCitiesOptions] = useState([]); // All cities for the selected state
-  const [selectedCity, setSelectedCity] = useState(null); // Selected city
-
-  // Pin codes
-  const [availablePincodes, setAvailablePincodes] = useState([]); // Pincodes from postalpincode.in
-  const [selectedPincode, setSelectedPincode] = useState(null);
 
   const navigate = useNavigate();
 
@@ -54,15 +43,12 @@ function SignupScreen() {
     4: ["address", "pincode", "city", "state"],
   };
 
-  /**
-   * Validate the given list of fields from formData.
-   * Returns true if all valid, otherwise false.
-   */
+  // Validate the given list of fields from formData
   const validateFields = (fields) => {
-    let newErrors = { ...errors }; // start with existing errors to preserve them
+    let newErrors = { ...errors };
     let isValid = true;
 
-    // Clear errors only for the fields we are validating now
+    // Clear errors only for the fields we validate now
     fields.forEach((field) => {
       delete newErrors[field];
     });
@@ -111,7 +97,7 @@ function SignupScreen() {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
 
-    // If user is typing pincode, and it meets the length of 6 digits, call the API
+    // If user is typing pincode, and it meets length 6, call the pincode API
     if (name === "pincode") {
       // Reset city and state if pincode changes
       setFormData((prev) => ({ ...prev, city: "", state: "" }));
@@ -173,11 +159,6 @@ function SignupScreen() {
     }
   };
 
-  // Move back to previous step
-  const handleBack = () => {
-    setStep(step - 1);
-  };
-
   // Final form submit (at Step 4)
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -187,15 +168,41 @@ function SignupScreen() {
       return;
     }
 
-    // Everything is valid up to step 4, proceed with API call
-    const requestBody = { ...formData };
+    // Construct the final 'address' array
+    const finalAddress = [
+      {
+        nick_name: formData.addressNickname || "Home",
+        street_details: formData.address,
+        city: formData.city,
+        state: formData.state,
+        pincode: parseInt(formData.pincode, 10),
+      },
+    ];
+
+    // Prepare the final request body
+    const requestBody = {
+      email: formData.email,
+      password: formData.password,
+      displayName: formData.displayName,
+      phoneNumber: formData.phoneNumber,
+      role: formData.role || "Designer",
+      is_creator: formData.is_creator, // or set to 'true' if always
+      shortDescription: formData.shortDescription || "Default short desc",
+      about: formData.about || "Default about text",
+      logoUrl: formData.logoUrl,
+      backgroundImageUrl: formData.backgroundImageUrl,
+      address: finalAddress,
+    };
 
     try {
-      const response = await fetch("http://localhost:5000/user/user-designer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await fetch(
+        "https://indigo-rhapsody-backend-ten.vercel.app/user/user-designer",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        }
+      );
 
       if (response.ok) {
         setShowModal(true);
@@ -213,67 +220,46 @@ function SignupScreen() {
     navigate("/");
   };
 
-  // ------------------------------------------------------------------
-  // RENDER
-  // ------------------------------------------------------------------
   return (
     <div className="signup-container">
-
-      {/* <div className="signup-modal"> */}
       {/* Header */}
       <div className="signup-header">
         <img src={logo} alt="Brand Logo" className="logo" />
-       
         <strong
-        style={{
-          fontSize: "20px",
-          fontWeight: "bold",
-          color: "black",
-        }}
-        >Create your Account</strong>
+          style={{
+            fontSize: "20px",
+            fontWeight: "bold",
+            color: "black",
+          }}
+        >
+          Create your Account
+        </strong>
       </div>
 
-      {/* Main Content: Vertical Progress + Form */}
+      {/* Progress Bar & Form */}
       <div className="main-content">
-        {/* Vertical Progress Bar */}
-        {/* <div className="progress-bar">
-    
+        <div className="progress-bar">
           <div className={`step ${step >= 1 ? "active" : ""}`}>
-            Roshni 1
+            <span className="circle">1</span>
+            <span className="label">Login</span>
           </div>
           <div className={`step ${step >= 2 ? "active" : ""}`}>
-          Roshni 2
+            <span className="circle">2</span>
+            <span className="label">Information</span>
           </div>
           <div className={`step ${step >= 3 ? "active" : ""}`}>
-          Roshni 3
+            <span className="circle">3</span>
+            <span className="label">Image</span>
           </div>
           <div className={`step ${step === 4 ? "active" : ""}`}>
-          Roshni 4
+            <span className="circle">4</span>
+            <span className="label">Address</span>
           </div>
-        </div> */}
-<div className="progress-bar">
-  <div className={`step ${step >= 1 ? "active" : ""}`}>
-    <span className="circle">1</span>
-    <span className="label">Login</span>
-  </div>
-  <div className={`step ${step >= 2 ? "active" : ""}`}>
-    <span className="circle">2</span>
-    <span className="label">Information</span>
-  </div>
-  <div className={`step ${step >= 3 ? "active" : ""}`}>
-    <span className="circle">3</span>
-    <span className="label">Image</span>
-  </div>
-  <div className={`step ${step === 4 ? "active" : ""}`}>
-    <span className="circle">4</span>
-    <span className="label">Address</span>
-  </div>
-</div>
+        </div>
 
-        {/* Form Container */}
         <div className="form-container">
           <form className="signup-form" onSubmit={handleSubmit}>
-            {/* Step 1: Display Name & Phone Number */}
+            {/* Step 1 */}
             {step === 1 && (
               <div className="step-content">
                 <div className="input-group">
@@ -306,7 +292,7 @@ function SignupScreen() {
               </div>
             )}
 
-            {/* Step 2: Email & Password */}
+            {/* Step 2 */}
             {step === 2 && (
               <div className="step-content">
                 <div className="input-group">
@@ -338,9 +324,31 @@ function SignupScreen() {
               </div>
             )}
 
-            {/* Step 3: Logo & Background Upload */}
+            {/* Step 3 */}
             {step === 3 && (
               <div className="step-content">
+                {/* Optionally add shortDescription and about fields here OR in step 2/4 */}
+                <div className="input-group">
+                  <label>Short Description</label>
+                  <input
+                    type="text"
+                    name="shortDescription"
+                    placeholder="A short bio or tagline"
+                    value={formData.shortDescription}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="input-group">
+                  <label>About</label>
+                  <input
+                    type="text"
+                    name="about"
+                    placeholder="More details about you"
+                    value={formData.about}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
                 <div className="input-group">
                   <label>Logo</label>
                   <input
@@ -359,14 +367,11 @@ function SignupScreen() {
                       handleFileUpload(e, "backgroundImageUrl", "backgrounds")
                     }
                   />
-                  {/* {errors.backgroundImageUrl && (
-                    <span className="error">{errors.backgroundImageUrl}</span>
-                  )} */}
                 </div>
               </div>
             )}
 
-            {/* Step 4: Address, Pincode, City & State */}
+            {/* Step 4 */}
             {step === 4 && (
               <div className="step-content">
                 <div className="input-group">
@@ -383,11 +388,21 @@ function SignupScreen() {
                   )}
                 </div>
                 <div className="input-group">
-                  <label>Address</label>
+                  <label>Address Nickname</label>
+                  <input
+                    type="text"
+                    name="addressNickname"
+                    placeholder="e.g., Home, Office, etc."
+                    value={formData.addressNickname}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="input-group">
+                  <label>Street Details</label>
                   <input
                     type="text"
                     name="address"
-                    placeholder="Enter your Address"
+                    placeholder="e.g., 123 Main Street"
                     value={formData.address}
                     onChange={handleInputChange}
                   />
@@ -396,7 +411,7 @@ function SignupScreen() {
                   )}
                 </div>
                 <div className="input-group">
-                  {/* <label>City</label> */}
+                  <label>City</label>
                   <input
                     type="text"
                     name="city"
@@ -404,12 +419,10 @@ function SignupScreen() {
                     value={formData.city}
                     onChange={handleInputChange}
                   />
-                  {errors.city && (
-                    <span className="error">{errors.city}</span>
-                  )}
+                  {errors.city && <span className="error">{errors.city}</span>}
                 </div>
                 <div className="input-group">
-                  {/* <label>State</label> */}
+                  <label>State</label>
                   <input
                     type="text"
                     name="state"
@@ -417,7 +430,6 @@ function SignupScreen() {
                     value={formData.state}
                     onChange={handleInputChange}
                   />
-                  
                   {errors.state && (
                     <span className="error">{errors.state}</span>
                   )}
@@ -427,16 +439,12 @@ function SignupScreen() {
 
             {/* Navigation Buttons */}
             <div className="form-action">
-              {/* {step > 1 && (
-                <button type="button" className="back-btn" onClick={handleBack}>
-                  Back
-                </button>
-              )} */}
               {step < 4 && (
-                <button type="button" className="next-btn" onClick={handleNext}
-                style={{
-                 marginTop: "30px",
-                }}
+                <button
+                  type="button"
+                  className="next-btn"
+                  onClick={handleNext}
+                  style={{ marginTop: "30px" }}
                 >
                   Next
                 </button>
@@ -464,7 +472,6 @@ function SignupScreen() {
           </div>
         </div>
       )}
-      {/* </div> */}
     </div>
   );
 }
