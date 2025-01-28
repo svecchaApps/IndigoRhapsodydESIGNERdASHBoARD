@@ -1,12 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Select from "react-select";
 import { storage } from "../../service/firebaseService";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
 import "./stylesheet.css";
 import logo from "../../assets/images/Asset_3.webp";
 
+// Universal Tutorial endpoints
+const UT_BASE_URL = "https://www.universal-tutorial.com/api";
+const AUTH_TOKEN =
+  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfZW1haWwiOiJyYWphdGppZWRtQGdtYWlsLmNvbSIsImFwaV90b2tlbiI6IjlGNnhKQnZzWmt5TzBEclNNaXMyMThFWkNBdEhZaERTLTBmaC1GcDljbl9fU3JyajRlYXBWSmtlR1FqczQ1dUxyNXMifSwiZXhwIjoxNzM3NTM3Njg3fQ.pq1tZUKH515al7o_Rq-lnYyj7t2tWOuSMjZxqOIL8r8";
+// Replace with your actual Bearer token if different
+
 function SignupScreen() {
-  const [step, setStep] = useState(1); // Track current step
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     displayName: "",
     phoneNumber: "",
@@ -23,6 +30,20 @@ function SignupScreen() {
 
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
+
+  // ----- For Select Fields -----
+  // States
+  const [statesOptions, setStatesOptions] = useState([]); // All states from UT
+  const [selectedState, setSelectedState] = useState(null); // Selected state
+
+  // Cities
+  const [citiesOptions, setCitiesOptions] = useState([]); // All cities for the selected state
+  const [selectedCity, setSelectedCity] = useState(null); // Selected city
+
+  // Pin codes
+  const [availablePincodes, setAvailablePincodes] = useState([]); // Pincodes from postalpincode.in
+  const [selectedPincode, setSelectedPincode] = useState(null);
+
   const navigate = useNavigate();
 
   // Fields to validate at each step
@@ -170,14 +191,11 @@ function SignupScreen() {
     const requestBody = { ...formData };
 
     try {
-      const response = await fetch(
-        "https://indigo-rhapsody-backend-ten.vercel.app/user/user-designer",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
-        }
-      );
+      const response = await fetch("http://localhost:5000/user/user-designer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
 
       if (response.ok) {
         setShowModal(true);
@@ -195,6 +213,9 @@ function SignupScreen() {
     navigate("/");
   };
 
+  // ------------------------------------------------------------------
+  // RENDER
+  // ------------------------------------------------------------------
   return (
     <div className="signup-container">
 
