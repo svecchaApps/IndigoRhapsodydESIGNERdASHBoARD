@@ -2,7 +2,6 @@ const BASE_URL = "https://indigo-rhapsody-backend-ten.vercel.app";
 
 const designerId = localStorage.getItem("designerId");
 const userId = localStorage.getItem("userId");
-import axios from "axios";
 
 export const createShippingOrder = async (shippingDetails) => {
   const response = await fetch(`${BASE_URL}/shipping/createOrder`, {
@@ -49,12 +48,21 @@ export const createInvoice = async (shipmentId) => {
   }
   return data;
 };
-
 export const getPickupLocationName = async (designerRef) => {
-  const response = await axios.get(
-    `${BASE_URL}/designer/${designerRef}/pickup-location`
+  const response = await fetch(
+    `${BASE_URL}/designer/${designerRef}/pickup-location`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
   );
-  return response.data;
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to get pickup location name");
+  }
+  return data;
 };
 
 export const getShippingDetails = async (shipmentId) => {
