@@ -245,12 +245,17 @@ function AddProductModal({ show, onClose }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    // Ensure that price is a non-negative value
+    if (name === "price" && value < 0) {
+      return; // Do nothing if the value is negative
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
-
   // Variant logic
   const handleAddColor = () => {
     setVariants([
@@ -279,13 +284,22 @@ function AddProductModal({ show, onClose }) {
 
   const handleVariantChange = (e, colorIndex, sizeIndex = null, field) => {
     const { value } = e.target;
+
+    // Ensure the value is a valid number and is non-negative
+    let newValue = value;
+
+    if (field === "price" || field === "stock") {
+      newValue = Math.max(0, parseFloat(value)); // If negative, reset to 0
+    }
+
     const newVariants = [...variants];
 
     if (sizeIndex === null) {
-      newVariants[colorIndex][field] = value;
+      newVariants[colorIndex][field] = newValue;
     } else {
-      newVariants[colorIndex].sizes[sizeIndex][field] = value;
+      newVariants[colorIndex].sizes[sizeIndex][field] = newValue;
     }
+
     setVariants(newVariants);
   };
 
@@ -335,16 +349,15 @@ function AddProductModal({ show, onClose }) {
 
   const handleRemoveVariantImage = (colorIndex, imageIndex) => {
     const newVariants = [...variants];
-    newVariants[colorIndex].imageList = newVariants[colorIndex].imageList.filter(
-      (_, i) => i !== imageIndex
-    );
+    newVariants[colorIndex].imageList = newVariants[
+      colorIndex
+    ].imageList.filter((_, i) => i !== imageIndex);
     setVariants(newVariants);
   };
 
   // Validation
   const validateFields = () => {
     const newErrors = {};
-
 
     if (!formData.productName.trim()) {
       newErrors.productName = "Product Name is required.";
@@ -512,6 +525,7 @@ function AddProductModal({ show, onClose }) {
                       type="number"
                       placeholder="Price"
                       value={size.price}
+                      min="0"
                       onChange={(e) =>
                         handleVariantChange(e, colorIndex, sizeIndex, "price")
                       }
@@ -520,6 +534,7 @@ function AddProductModal({ show, onClose }) {
                       type="number"
                       placeholder="Stock"
                       value={size.stock}
+                      min="0"
                       onChange={(e) =>
                         handleVariantChange(e, colorIndex, sizeIndex, "stock")
                       }
@@ -546,7 +561,11 @@ function AddProductModal({ show, onClose }) {
                 ))}
               </div>
             ))}
-            <button type="button" className="add-button" onClick={handleAddColor}>
+            <button
+              type="button"
+              className="add-button"
+              onClick={handleAddColor}
+            >
               + Add Color
             </button>
           </FormSection>
@@ -613,6 +632,7 @@ function AddProductModal({ show, onClose }) {
               <input
                 type="number"
                 name="price"
+                min="0"
                 placeholder="Base Price"
                 value={formData.price}
                 onChange={handleInputChange}

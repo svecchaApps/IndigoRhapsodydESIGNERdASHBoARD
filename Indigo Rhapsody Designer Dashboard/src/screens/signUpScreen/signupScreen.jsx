@@ -84,10 +84,10 @@ function SignupScreen() {
     setErrors(newErrors);
     return isValid;
   };
-
-  // Handle all input changes
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
+
+    let newErrors = { ...errors };
 
     // Update formData
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -97,7 +97,26 @@ function SignupScreen() {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
 
-    // If user is typing pincode, and it meets length 6, call the pincode API
+    // Email validation
+    if (name === "email") {
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailPattern.test(value)) {
+        newErrors.email = "Please enter a valid email address";
+      } else {
+        delete newErrors.email;
+      }
+    }
+
+    // Password validation (at least 6 characters)
+    if (name === "password") {
+      if (value.length < 6) {
+        newErrors.password = "Password must be at least 6 characters long";
+      } else {
+        delete newErrors.password;
+      }
+    }
+
+    // Pincode validation and API call (if pincode is exactly 6 characters long)
     if (name === "pincode") {
       // Reset city and state if pincode changes
       setFormData((prev) => ({ ...prev, city: "", state: "" }));
@@ -126,12 +145,17 @@ function SignupScreen() {
         }
       }
     }
+
+    // Update errors state
+    setErrors(newErrors);
   };
 
   // Handle file uploads for Logo / Background
   const handleFileUpload = async (e, fieldName, folder) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    let newErrors = { ...errors };
 
     try {
       const fileRef = ref(storage, `${folder}/${file.name}`);
@@ -143,12 +167,14 @@ function SignupScreen() {
         [fieldName]: url,
       }));
 
-      // Clear existing errors for this field if any
-      if (errors[fieldName]) {
-        setErrors((prev) => ({ ...prev, [fieldName]: "" }));
-      }
+      // Clear error for this field if a valid file is uploaded
+      delete newErrors[fieldName];
+
+      setErrors(newErrors); // Update errors state
     } catch (error) {
       console.error("File upload error:", error);
+      newErrors[fieldName] = "File upload failed. Try again.";
+      setErrors(newErrors);
     }
   };
 
@@ -303,6 +329,9 @@ function SignupScreen() {
                     placeholder="Your Email Address"
                     value={formData.email}
                     onChange={handleInputChange}
+                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+                    title="Please enter a valid email address" // Tooltip for invalid input
+                    required // Mark the field as required
                   />
                   {errors.email && (
                     <span className="error">{errors.email}</span>
@@ -316,6 +345,7 @@ function SignupScreen() {
                     placeholder="Enter Password"
                     value={formData.password}
                     onChange={handleInputChange}
+                    required // Mark as required
                   />
                   {errors.password && (
                     <span className="error">{errors.password}</span>
@@ -323,11 +353,10 @@ function SignupScreen() {
                 </div>
               </div>
             )}
-
+            {/* Step 3 */}
             {/* Step 3 */}
             {step === 3 && (
               <div className="step-content">
-                {/* Optionally add shortDescription and about fields here OR in step 2/4 */}
                 <div className="input-group">
                   <label>Short Description</label>
                   <input
@@ -359,6 +388,7 @@ function SignupScreen() {
                     <span className="error">{errors.logoUrl}</span>
                   )}
                 </div>
+
                 <div className="input-group">
                   <label>Background</label>
                   <input
@@ -367,6 +397,10 @@ function SignupScreen() {
                       handleFileUpload(e, "backgroundImageUrl", "backgrounds")
                     }
                   />
+                  {/* Added error display for Background */}
+                  {errors.backgroundImageUrl && (
+                    <span className="error">{errors.backgroundImageUrl}</span>
+                  )}
                 </div>
               </div>
             )}
