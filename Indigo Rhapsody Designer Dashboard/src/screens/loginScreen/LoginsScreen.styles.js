@@ -4,6 +4,25 @@ export const LoginScreenWrap = styled.div`
   display: flex;
   min-height: 100vh;
   background-color: #f4f7fc;
+
+  .password-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .password-field input {
+    width: 100%;
+    padding-right: 40px; /* Ensures space for eye icon */
+  }
+
+  .eye-icon {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    color: #555;
+    font-size: 1.2rem;
+  }
 `;
 
 export const LeftSection = styled.div`
@@ -126,8 +145,8 @@ export const FormContainer = styled.div`
       outline: none;
 
       &:focus {
-      border: 1px solid rgb(15, 57, 209);
-        border-color:rgb(15, 57, 209);
+        border: 1px solid rgb(15, 57, 209);
+        border-color: rgb(15, 57, 209);
       }
     }
   }

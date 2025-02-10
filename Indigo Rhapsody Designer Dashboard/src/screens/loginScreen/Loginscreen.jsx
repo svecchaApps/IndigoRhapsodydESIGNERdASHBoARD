@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
 import logo from "../../assets/images/Asset_3.webp";
-
 import {
   LoginScreenWrap,
   LeftSection,
@@ -11,13 +11,13 @@ import {
   FormContainer,
   InfoContainer,
 } from "./LoginsScreen.styles";
-import { FaGoogle } from "react-icons/fa";
 import { loginDesigner } from "../../service/authService";
 
 function Loginscreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,14 +82,20 @@ function Loginscreen() {
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="form-group password-field">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <span
+                className="eye-icon"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
             </div>
             <button type="submit" className="login-btn" disabled={loading}>
               {loading ? "Logging in..." : "Sign in"}
@@ -97,7 +103,7 @@ function Loginscreen() {
             <div className="separator">or</div>
 
             <p className="signup-link">
-              Don't have an account? <a href="/signup">Sign up</a>
+              Don't have an account? <Link to="/signup">Sign up</Link>
             </p>
           </form>
         </FormContainer>

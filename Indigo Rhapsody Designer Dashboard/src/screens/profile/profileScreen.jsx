@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import {
   dashBoardDesigner,
-  updateProfile,
   updateProfileRequest,
-} from "../../service/userProfile"; // Import your API function
-import { storage } from "../../service/firebaseService"; // Import the storage instance
+} from "../../service/userProfile";
+import { storage } from "../../service/firebaseService";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 // Styled components for styling
@@ -101,6 +100,7 @@ const ModalOverlay = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
 const ModalContent = styled.div`
   background: #fff;
   padding: 30px;
@@ -181,7 +181,6 @@ const uploadImageToFirebase = async (file, folder = "ProfileImages") => {
     const url = await getDownloadURL(fileRef);
     return url;
   } catch (error) {
-    // console.error("Error uploading image to Firebase:", error);
     throw new Error("Failed to upload image");
   }
 };
@@ -198,7 +197,7 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetchDesignerDetails = async () => {
       try {
-        const data = await dashBoardDesigner();
+        const data = await dashBoardDesigner(); // Fetch designer details from API
         setDesigner(data.designer);
         setFormData(data.designer.userId); // Pre-fill form data with existing user data
         setLoading(false);
@@ -311,7 +310,7 @@ const ProfileScreen = () => {
             <label>Address</label>
             <input
               type="text"
-              value={designer.userId.address || "N/A"}
+              value={designer.userId.address[0].street_details || "N/A"}
               readOnly
             />
           </div>
