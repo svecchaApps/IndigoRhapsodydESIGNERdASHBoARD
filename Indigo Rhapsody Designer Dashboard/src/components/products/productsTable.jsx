@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, Button, Space, Modal, Carousel } from "antd";
-import { SearchOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
-import { getProductsBydesigner } from "../../service/productsService";
+import { Table, Input, Button, Space, Modal, Carousel, message } from "antd";
+import {
+  SearchOutlined,
+  EditOutlined,
+  EyeOutlined,
+  CloseOutlined,
+  CheckOutlined,
+} from "@ant-design/icons";
+import {
+  getProductsBydesigner,
+  updateProductStatus,
+} from "../../service/productsService";
 import EditProductModal from "../../components/editProductsa/editProductsModal";
 
 const ProductsTable = () => {
@@ -78,6 +87,27 @@ const ProductsTable = () => {
     setSelectedImages([]);
   };
 
+  const handleToggleStatus = async (product) => {
+    try {
+      const updatedProduct = await updateProductStatus(
+        product._id,
+        !product.enabled
+      );
+      const updatedProducts = products.map((p) =>
+        p._id === updatedProduct._id ? updatedProduct : p
+      );
+      setProducts(updatedProducts);
+      setFilteredProducts(updatedProducts);
+      message.success(
+        `Product ${
+          updatedProduct.enabled ? "enabled" : "disabled"
+        } successfully!`
+      );
+    } catch (error) {
+      message.error("Failed to update product status");
+    }
+  };
+
   const columns = [
     {
       title: "Name",
@@ -96,7 +126,12 @@ const ProductsTable = () => {
               <img
                 src={coverImage[0]}
                 alt="cover"
-                style={{ width: "50px", height: "50px", objectFit: "cover", cursor: "pointer" }}
+                style={{
+                  width: "50px",
+                  height: "50px",
+                  objectFit: "cover",
+                  cursor: "pointer",
+                }}
                 onClick={() => handleImageClick(coverImage)}
               />
             );
@@ -108,7 +143,12 @@ const ProductsTable = () => {
             <img
               src={coverImage}
               alt="cover"
-              style={{ width: "50px", height: "50px", objectFit: "cover", cursor: "pointer" }}
+              style={{
+                width: "50px",
+                height: "50px",
+                objectFit: "cover",
+                cursor: "pointer",
+              }}
               onClick={() => handleImageClick([coverImage])}
             />
           );
@@ -140,7 +180,9 @@ const ProductsTable = () => {
       key: "inventory",
       render: (_, product) =>
         product.variants
-          .flatMap((variant) => variant.sizes.map((size) => `${size.size} - ${size.stock}`))
+          .flatMap((variant) =>
+            variant.sizes.map((size) => `${size.size} - ${size.stock}`)
+          )
           .join(", "),
     },
     {
@@ -161,6 +203,13 @@ const ProductsTable = () => {
             onClick={() => handleEdit(product)}
           >
             Edit
+          </Button>
+          <Button
+            type={product.enabled ? "danger" : "primary"}
+            icon={product.enabled ? <CloseOutlined /> : <CheckOutlined />}
+            onClick={() => handleToggleStatus(product)}
+          >
+            {product.enabled ? "Disable" : "Enable"}
           </Button>
         </Space>
       ),
@@ -219,19 +268,29 @@ const ProductsTable = () => {
               <strong>Price:</strong> ₹{selectedProduct.price}
             </p>
             <p>
-              <strong>Category:</strong> {selectedProduct.category?.name || "N/A"}
+              <strong>Category:</strong>{" "}
+              {selectedProduct.category?.name || "N/A"}
             </p>
             <p>
-              <strong>Sub-Category:</strong> {selectedProduct.subCategory?.name || "N/A"}
+              <strong>Sub-Category:</strong>{" "}
+              {selectedProduct.subCategory?.name || "N/A"}
             </p>
             <p>
-              <strong>Description:</strong> {selectedProduct.description || "N/A"}
+              <strong>Description:</strong>{" "}
+              {selectedProduct.description || "N/A"}
             </p>
 
             {/* Display Cover Images */}
             <div>
               <strong>Cover Images:</strong>
-              <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  marginTop: "10px",
+                  flexWrap: "wrap",
+                }}
+              >
                 {Array.isArray(selectedProduct.coverImage) ? (
                   selectedProduct.coverImage.length > 0 ? (
                     selectedProduct.coverImage.map((img, i) => (
@@ -239,7 +298,11 @@ const ProductsTable = () => {
                         key={i}
                         src={img}
                         alt={`Cover Image ${i}`}
-                        style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          objectFit: "cover",
+                        }}
                       />
                     ))
                   ) : (
@@ -249,7 +312,11 @@ const ProductsTable = () => {
                   <img
                     src={selectedProduct.coverImage}
                     alt="Cover Image"
-                    style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "cover",
+                    }}
                   />
                 ) : (
                   <p>No cover image</p>
@@ -257,46 +324,46 @@ const ProductsTable = () => {
               </div>
             </div>
 
+            <div style={{ marginTop: "20px" }}>
+              <strong>Variants:</strong>
+              {selectedProduct.variants.map((variant, index) => (
+                <div key={index} style={{ marginBottom: "20px" }}>
+                  <p>
+                    Color: {variant.color}, Sizes:{" "}
+                    {variant.sizes
+                      .map((size) => `${size.size} (Stock: ${size.stock})`)
+                      .join(", ")}
+                  </p>
 
-
-
-<div style={{ marginTop: "20px" }}>
-  <strong>Variants:</strong>
-  {selectedProduct.variants.map((variant, index) => (
-    <div key={index} style={{ marginBottom: "20px" }}>
-      <p>
-        Color: {variant.color}, Sizes:{" "}
-        {variant.sizes
-          .map((size) => `${size.size} (Stock: ${size.stock})`)
-          .join(", ")}
-      </p>
-
-      {/* Display the imageList for this variant */}
-      {variant.imageList && variant.imageList.length > 0 ? (
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            marginTop: "10px",
-            flexWrap: "wrap",
-          }}
-        >
-          {variant.imageList.map((vImage, vIndex) => (
-            <img
-              key={vIndex}
-              src={vImage}
-              alt={`Variant ${index} Image ${vIndex}`}
-              style={{ width: "50px", height: "50px", objectFit: "cover" }}
-            />
-          ))}
-        </div>
-      ) : (
-        <p>No images for this variant</p>
-      )}
-    </div>
-  ))}
-</div>
-
+                  {/* Display the imageList for this variant */}
+                  {variant.imageList && variant.imageList.length > 0 ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        marginTop: "10px",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {variant.imageList.map((vImage, vIndex) => (
+                        <img
+                          key={vIndex}
+                          src={vImage}
+                          alt={`Variant ${index} Image ${vIndex}`}
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p>No images for this variant</p>
+                  )}
+                </div>
+              ))}
+            </div>
           </Modal>
 
           {/* Edit Modal */}
