@@ -192,6 +192,7 @@ function AddProductModal({ show, onClose }) {
     fit: "",
     fabric: "",
     material: "",
+    mrp: "",
   });
 
   // State to store field errors
@@ -569,7 +570,6 @@ function AddProductModal({ show, onClose }) {
               + Add Color
             </button>
           </FormSection>
-
           {/* =============== COVER IMAGE SECTION (Optional) =============== */}
           <FormSection>
             <h4>Cover Image (Optional)</h4>
@@ -596,7 +596,6 @@ function AddProductModal({ show, onClose }) {
               </div>
             )}
           </FormSection>
-
           {/* =============== GENERAL INFO =============== */}
           <FormSection>
             <h4>General Information</h4>
@@ -624,7 +623,6 @@ function AddProductModal({ show, onClose }) {
               <div className="error-text">{errors.description}</div>
             )}
           </FormSection>
-
           {/* =============== PRICE =============== */}
           <FormSection>
             <h4>Price</h4>
@@ -639,8 +637,21 @@ function AddProductModal({ show, onClose }) {
               />
             </div>
             {errors.price && <div className="error-text">{errors.price}</div>}
+          </FormSection>{" "}
+          <FormSection>
+            <h4>Mrp</h4>
+            <div className="input-group">
+              <input
+                type="number"
+                name="mrp"
+                min="0"
+                placeholder="Mrp"
+                value={formData.mrp}
+                onChange={handleInputChange}
+              />
+            </div>
+            {errors.price && <div className="error-text">{errors.price}</div>}
           </FormSection>
-
           {/* =============== META DATA =============== */}
           <FormSection>
             <h4>Meta data</h4>
@@ -655,7 +666,6 @@ function AddProductModal({ show, onClose }) {
             </div>
             {errors.sku && <div className="error-text">{errors.sku}</div>}
           </FormSection>
-
           {/* =============== FIT =============== */}
           <FormSection>
             <h4>Fit</h4>
@@ -670,7 +680,6 @@ function AddProductModal({ show, onClose }) {
             </div>
             {errors.fit && <div className="error-text">{errors.fit}</div>}
           </FormSection>
-
           {/* =============== FABRIC =============== */}
           <FormSection>
             <h4>Fabric</h4>
@@ -685,7 +694,6 @@ function AddProductModal({ show, onClose }) {
             </div>
             {errors.fabric && <div className="error-text">{errors.fabric}</div>}
           </FormSection>
-
           {/* =============== MATERIAL =============== */}
           <FormSection>
             <h4>Material</h4>
@@ -702,7 +710,6 @@ function AddProductModal({ show, onClose }) {
               <div className="error-text">{errors.material}</div>
             )}
           </FormSection>
-
           {/* =============== CATEGORY =============== */}
           <FormSection>
             <h4>Category</h4>
@@ -721,7 +728,6 @@ function AddProductModal({ show, onClose }) {
               <div className="error-text">{errors.category}</div>
             )}
           </FormSection>
-
           {/* =============== SUBCATEGORY =============== */}
           <FormSection>
             <h4>SubCategory</h4>
