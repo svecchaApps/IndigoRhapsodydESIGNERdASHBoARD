@@ -396,6 +396,15 @@ export const OrderScreenWrap = styled.div`
                       background: #2563eb;
                     }
                   }
+
+                  &.cancel-btn {
+                    background: #ef4444;
+                    color: white;
+
+                    &:hover {
+                      background: #dc2626;
+                    }
+                  }
                 }
               }
             }

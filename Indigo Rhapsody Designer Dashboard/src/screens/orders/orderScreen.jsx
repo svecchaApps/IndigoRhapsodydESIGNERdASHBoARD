@@ -3,6 +3,7 @@ import { OrderScreenWrap } from "./orderScreen.styles";
 import { getOrderForTable } from "../../service/dashBoardService";
 import OrderDetailsModal from "./orderModal";
 import ShipOrderModal from "./shipOrdarModal";
+import CancelOrderModal from "./cancelOrderModal";
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon,
@@ -23,6 +24,7 @@ const OrderScreen = () => {
   const [error, setError] = useState(null);
   const [showShipModal, setShowShipModal] = useState(false);
   const [showOrderModal, setShowOrderModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -102,6 +104,30 @@ const OrderScreen = () => {
   const handleViewOrder = (order) => {
     setSelectedOrder(order);
     setShowOrderModal(true);
+  };
+
+  const handleCancelOrder = (order) => {
+    setSelectedOrder(order);
+    setShowCancelModal(true);
+  };
+
+  const handleCancelSuccess = () => {
+    // Refresh the orders list after successful cancellation
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const data = await getOrderForTable();
+        setOrders(data.orders || []);
+        setFilteredOrders(data.orders || []);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setError(error.message);
+        setLoading(false);
+        toast.error("Failed to load orders");
+      }
+    };
+    fetchOrders();
   };
 
   const getStatusColor = (status) => {
@@ -365,13 +391,22 @@ const OrderScreen = () => {
                         </button>
                         {(order.status?.toLowerCase() === 'pending' || 
                           order.status?.toLowerCase() === 'order placed') && (
-                          <button 
-                            className="action-btn ship-btn"
-                            onClick={() => handleShipOrder(order)}
-                          >
-                            <TruckIcon className="w-4 h-4" />
-                            <span>Ship</span>
-                          </button>
+                          <>
+                            <button 
+                              className="action-btn ship-btn"
+                              onClick={() => handleShipOrder(order)}
+                            >
+                              <TruckIcon className="w-4 h-4" />
+                              <span>Ship</span>
+                            </button>
+                            <button 
+                              className="action-btn cancel-btn"
+                              onClick={() => handleCancelOrder(order)}
+                            >
+                              <XCircleIcon className="w-4 h-4" />
+                              <span>Cancel</span>
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -432,6 +467,17 @@ const OrderScreen = () => {
           order={selectedOrder}
         />
       )}
+      
+      {showCancelModal && selectedOrder && (
+        <CancelOrderModal
+          show={showCancelModal}
+          onClose={() => setShowCancelModal(false)}
+          order={selectedOrder}
+          onCancelSuccess={handleCancelSuccess}
+        />
+      )}
+      
+
     </OrderScreenWrap>
   );
 };
