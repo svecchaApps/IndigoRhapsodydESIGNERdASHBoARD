@@ -59,3 +59,17 @@ export const getOrderForTable = async () => {
     throw error;
   }
 };
+
+export const getDesignerCommission = async () => {
+  try {
+    const designerId = getDesignerId();
+    if (!designerId) {
+      throw new Error('Designer ID not found');
+    }
+
+    const data = await apiGet(`/designer/${designerId}/commission`);
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};

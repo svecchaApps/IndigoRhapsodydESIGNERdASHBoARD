@@ -4,7 +4,8 @@ import {
   dashBoardDesigner,
   dashBoardDesignerSales,
   dashBoardDesignerProducts,
-  getOrderForTable
+  getOrderForTable,
+  getDesignerCommission
 } from "../../service/dashBoardService";
 import { getProductsBydesigner } from "../../service/productsService";
 import { Icons } from "../../assets/icons";
@@ -25,7 +26,8 @@ const DashboardScreen = () => {
     products: 0,
     activeProducts: 0,
     outOfStockProducts: 0,
-    recentOrders: []
+    recentOrders: [],
+    commission: null
   });
   const [loading, setLoading] = useState(true);
 
@@ -33,11 +35,12 @@ const DashboardScreen = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const [ordersRes, salesRes, productsRes, recentOrdersRes] = await Promise.all([
+        const [ordersRes, salesRes, productsRes, recentOrdersRes, commissionRes] = await Promise.allSettled([
           dashBoardDesigner(),
           dashBoardDesignerSales(),
           dashBoardDesignerProducts(),
-          getOrderForTable()
+          getOrderForTable(),
+          getDesignerCommission()
         ]);
 
         // Get products data to calculate statistics
@@ -47,13 +50,16 @@ const DashboardScreen = () => {
         const activeProducts = products.filter(product => product.enabled === true).length;
         const outOfStockProducts = products.filter(product => product.stock === 0 || product.stock <= 0).length;
         
+        const commission = commissionRes.status === 'fulfilled' ? commissionRes.value : null;
+        
         setDashboardData({
-          orders: ordersRes?.totalOrders || 0,
-          sales: salesRes?.totalSalesAmount || 0,
-          products: productsRes?.totalProducts || 0,
+          orders: ordersRes.status === 'fulfilled' ? (ordersRes.value?.totalOrders || 0) : 0,
+          sales: salesRes.status === 'fulfilled' ? (salesRes.value?.totalSalesAmount || 0) : 0,
+          products: productsRes.status === 'fulfilled' ? (productsRes.value?.totalProducts || 0) : 0,
           activeProducts,
           outOfStockProducts,
-          recentOrders: recentOrdersRes?.orders?.slice(0, 5) || []
+          recentOrders: recentOrdersRes.status === 'fulfilled' ? (recentOrdersRes.value?.orders?.slice(0, 5) || []) : [],
+          commission
         });
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -129,7 +135,20 @@ const DashboardScreen = () => {
       trend: "+3.2%",
       trendUp: true
     },
-    
+    ...(dashboardData.commission != null
+      ? [
+          {
+            title: "Commission",
+            value: formatCurrency(dashboardData.commission.commission_total ?? 0),
+            icon: CurrencyDollarIcon,
+            color: "bg-amber-500",
+            bgColor: "bg-amber-50",
+            textColor: "text-amber-600",
+            trend: `${((dashboardData.commission.commissionRate ?? 0) * 100).toFixed(0)}% rate`,
+            trendUp: true
+          }
+        ]
+      : [])
   ];
 
   return (

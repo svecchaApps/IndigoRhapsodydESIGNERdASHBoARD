@@ -16,6 +16,7 @@ import ProfileScreen from "./screens/profile/profileScreen";
 import VideosScreen from "./screens/videos/videosScreen";
 import "react-toastify/dist/ReactToastify.css";
 import NotificationScreen from "./screens/notifications/notificationScreen";
+import CommissionsScreen from "./screens/commissions/CommissionsScreen";
 import SignupScreen from "./screens/signUpScreen/signupScreen";
 import { AuthProvider } from "./context/AuthContext";
 import { getApiBaseUrl, isProduction, isTesting } from "./config/environment";
@@ -50,6 +51,7 @@ function App() {
               <Route path="shippingDetails" element={<ShippingPage />} />
               <Route path="returnRequest" element={<ReturnRequest />} />
               <Route path="videos" element={<VideosScreen />} />
+              <Route path="commissions" element={<CommissionsScreen />} />
               <Route path="profile" element={<ProfileScreen />} />
               <Route path="notifications" element={<NotificationScreen />} />
             </Route>

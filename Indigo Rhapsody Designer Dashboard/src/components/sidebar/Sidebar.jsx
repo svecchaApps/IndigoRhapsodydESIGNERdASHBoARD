@@ -116,6 +116,18 @@ function Sidebar() {
               </NavLink>
             </li>
             <li className="menu-item">
+              <NavLink
+                to="/dashboard/commissions"
+                className="menu-link"
+                activeClassName="active"
+              >
+                <span className="menu-link-icon">
+                  <img src={Icons.CardSales} alt="" />
+                </span>
+                <span className="menu-link-text">Commissions</span>
+              </NavLink>
+            </li>
+            <li className="menu-item">
               <NavLink to="/dashboard/profile" className="menu-link">
                 <span className="menu-link-icon">
                   <img src={Icons.BagGreen} alt="" />
