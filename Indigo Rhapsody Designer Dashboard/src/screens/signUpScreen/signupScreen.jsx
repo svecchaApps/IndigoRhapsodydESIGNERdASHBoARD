@@ -1,10 +1,82 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "../../service/firebaseService"; // Adjust import to match your file structure
+import { toast } from "react-toastify";
+import {
+  FaEye,
+  FaEyeSlash,
+  FaCloudUploadAlt,
+  FaCheck,
+  FaArrowLeft,
+  FaArrowRight,
+} from "react-icons/fa";
+import { storage } from "../../service/firebaseService";
 import { getApiBaseUrl } from "../../config/environment";
-import logo from "../../assets/images/logo.webp";
-import "./stylesheet.css";
+import logo from "../../assets/images/Asset_3.webp";
+import {
+  SignUpScreenWrap,
+  BackgroundOrbs,
+  SignUpLayout,
+  SidePanel,
+  BrandBlock,
+  StepList,
+  StepItem,
+  StepCircle,
+  StepMeta,
+  FormPanel,
+  FormCard,
+  StepHeader,
+  FormGrid,
+  FieldGroup,
+  PasswordField,
+  FieldError,
+  UploadZone,
+  FormActions,
+  PrimaryButton,
+  SecondaryButton,
+  LoginPrompt,
+  ModalOverlay,
+  ModalCard,
+  PincodeHint,
+} from "./SignUpScreen.styles";
+
+const STEPS = [
+  {
+    id: 1,
+    label: "Profile",
+    hint: "Name & contact",
+    title: "Your designer profile",
+    subtitle: "How customers will know you on Indigo Rhapsody.",
+  },
+  {
+    id: 2,
+    label: "Account",
+    hint: "Email & password",
+    title: "Secure your account",
+    subtitle: "Use these credentials to access your designer dashboard.",
+  },
+  {
+    id: 3,
+    label: "Brand",
+    hint: "Images & bio",
+    title: "Showcase your brand",
+    subtitle: "Add visuals and a short story that represent your work.",
+  },
+  {
+    id: 4,
+    label: "Address",
+    hint: "Shipping details",
+    title: "Business address",
+    subtitle: "Used for orders and logistics across India.",
+  },
+];
+
+const stepFields = {
+  1: ["displayName", "phoneNumber"],
+  2: ["email", "password"],
+  3: ["logoUrl", "backgroundImageUrl"],
+  4: ["address", "pincode", "city", "state"],
+};
 
 function SignupScreen() {
   const [step, setStep] = useState(1);
@@ -13,18 +85,13 @@ function SignupScreen() {
     phoneNumber: "",
     email: "",
     password: "",
-    // Additional Fields
     is_creator: true,
     shortDescription: "",
     about: "",
     role: "Designer",
-
-    // For images
     logoUrl: "",
     backgroundImageUrl: "",
-
-    // Address fields
-    addressNickname: "Home", // By default "Home"
+    addressNickname: "Home",
     address: "",
     pincode: "",
     city: "",
@@ -33,23 +100,18 @@ function SignupScreen() {
 
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [pincodeLoading, setPincodeLoading] = useState(false);
+  const [uploading, setUploading] = useState({ logoUrl: false, backgroundImageUrl: false });
 
   const navigate = useNavigate();
+  const currentStep = STEPS[step - 1];
 
-  // Fields to validate at each step
-  const stepFields = {
-    1: ["displayName", "phoneNumber"],
-    2: ["email", "password"],
-    3: ["logoUrl", "backgroundImageUrl"],
-    4: ["address", "pincode", "city", "state"],
-  };
-
-  // Validate the given list of fields from formData
   const validateFields = (fields) => {
-    let newErrors = { ...errors };
+    const newErrors = { ...errors };
     let isValid = true;
 
-    // Clear errors only for the fields we validate now
     fields.forEach((field) => {
       delete newErrors[field];
     });
@@ -57,18 +119,16 @@ function SignupScreen() {
     fields.forEach((field) => {
       const value = formData[field];
 
-      // Check if value is empty
       if (!value) {
         newErrors[field] = "This field is required";
         isValid = false;
       }
 
-      // Additional validations
       if (field === "phoneNumber" && value) {
         const phoneRegex = /^\+91\d{10}$/;
         if (!phoneRegex.test(value)) {
           newErrors.phoneNumber =
-            "Phone number must be in the format +91XXXXXXXXXX";
+            "Use format +91 followed by 10 digits (e.g. +919876543210)";
           isValid = false;
         }
       }
@@ -76,7 +136,7 @@ function SignupScreen() {
       if (field === "pincode" && value) {
         const pincodeRegex = /^\d{6}$/;
         if (!pincodeRegex.test(value)) {
-          newErrors.pincode = "Pin code must be exactly 6 digits.";
+          newErrors.pincode = "Pin code must be exactly 6 digits";
           isValid = false;
         }
       }
@@ -85,52 +145,47 @@ function SignupScreen() {
     setErrors(newErrors);
     return isValid;
   };
+
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
+    const newErrors = { ...errors };
 
-    let newErrors = { ...errors };
-
-    // Update formData
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear existing errors for this field if any
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
 
-    // Email validation
     if (name === "email") {
       const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailPattern.test(value)) {
+      if (value && !emailPattern.test(value)) {
         newErrors.email = "Please enter a valid email address";
       } else {
         delete newErrors.email;
       }
     }
 
-    // Password validation (at least 6 characters)
     if (name === "password") {
-      if (value.length < 6) {
-        newErrors.password = "Password must be at least 6 characters long";
+      if (value && value.length < 6) {
+        newErrors.password = "Password must be at least 6 characters";
       } else {
         delete newErrors.password;
       }
     }
 
-    // Pincode validation and API call (if pincode is exactly 6 characters long)
     if (name === "pincode") {
-      // Reset city and state if pincode changes
       setFormData((prev) => ({ ...prev, city: "", state: "" }));
 
       if (value.length === 6) {
+        setPincodeLoading(true);
         try {
           const response = await fetch(
             `https://api.postalpincode.in/pincode/${value}`
           );
           const data = await response.json();
 
-          if (data && data[0] && data[0].Status === "Success") {
-            const postOfficeInfo = data[0].PostOffice[0];
+          if (data?.[0]?.Status === "Success") {
+            const postOfficeInfo = data[0].PostOffice?.[0];
             if (postOfficeInfo) {
               setFormData((prev) => ({
                 ...prev,
@@ -138,64 +193,60 @@ function SignupScreen() {
                 state: postOfficeInfo.State || "",
               }));
             }
-          } else {
-            console.error("Invalid pincode or API error:", data);
           }
         } catch (error) {
           console.error("Error fetching pincode details:", error);
+        } finally {
+          setPincodeLoading(false);
         }
       }
     }
 
-    // Update errors state
     setErrors(newErrors);
   };
 
-  // Handle file uploads for Logo / Background
   const handleFileUpload = async (e, fieldName, folder) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    let newErrors = { ...errors };
+    const newErrors = { ...errors };
+    setUploading((prev) => ({ ...prev, [fieldName]: true }));
 
     try {
-      const fileRef = ref(storage, `${folder}/${file.name}`);
+      const fileRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
       await uploadBytes(fileRef, file);
       const url = await getDownloadURL(fileRef);
 
-      setFormData((prev) => ({
-        ...prev,
-        [fieldName]: url,
-      }));
-
-      // Clear error for this field if a valid file is uploaded
+      setFormData((prev) => ({ ...prev, [fieldName]: url }));
       delete newErrors[fieldName];
-
-      setErrors(newErrors); // Update errors state
+      setErrors(newErrors);
     } catch (error) {
       console.error("File upload error:", error);
-      newErrors[fieldName] = "File upload failed. Try again.";
+      newErrors[fieldName] = "Upload failed. Please try again.";
       setErrors(newErrors);
+      toast.error("Image upload failed. Please try again.");
+    } finally {
+      setUploading((prev) => ({ ...prev, [fieldName]: false }));
     }
   };
 
-  // Move to next step after validation
   const handleNext = () => {
     if (validateFields(stepFields[step])) {
-      setStep(step + 1);
+      setStep((s) => s + 1);
     }
   };
 
-  // Final form submit (at Step 4)
+  const handleBack = () => {
+    setStep((s) => Math.max(1, s - 1));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate step 4 fields before sending data
     if (!validateFields(stepFields[4])) {
       return;
     }
 
-    // Construct the final 'address' array
     const finalAddress = [
       {
         nick_name: formData.addressNickname || "Home",
@@ -206,14 +257,13 @@ function SignupScreen() {
       },
     ];
 
-    // Prepare the final request body
     const requestBody = {
       email: formData.email,
       password: formData.password,
       displayName: formData.displayName,
       phoneNumber: formData.phoneNumber,
       role: formData.role || "Designer",
-      is_creator: formData.is_creator, // or set to 'true' if always
+      is_creator: formData.is_creator,
       shortDescription: formData.shortDescription || "Default short desc",
       about: formData.about || "Default about text",
       logoUrl: formData.logoUrl,
@@ -221,293 +271,344 @@ function SignupScreen() {
       address: finalAddress,
     };
 
+    setSubmitting(true);
     try {
-      const response = await fetch(
-        `${getApiBaseUrl()}/user/user-designer`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
-        }
-      );
+      const response = await fetch(`${getApiBaseUrl()}/user/user-designer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
 
       if (response.ok) {
         setShowModal(true);
       } else {
-        const errorData = await response.json();
-        alert("Error: " + (errorData.message || "Sign-up failed"));
+        const errorData = await response.json().catch(() => ({}));
+        toast.error(errorData.message || "Sign-up failed. Please try again.");
       }
-    } catch (error) {
-      alert("Error during sign-up. Please try again later.");
+    } catch {
+      toast.error("Something went wrong. Please try again later.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // On success, continue to next route
   const handleContinue = () => {
     navigate("/");
   };
 
-  return (
-    <div className="signup-container">
-      {/* Header */}
-      <div className="signup-header">
-        <img src={logo} alt="Brand Logo" className="logo" />
-        <strong
-          style={{
-            fontSize: "20px",
-            fontWeight: "bold",
-            color: "black",
-          }}
-        >
-          Create your Account
+  const renderUpload = (fieldName, folder, label, hint) => (
+    <FieldGroup>
+      <label>{label}</label>
+      <UploadZone $hasFile={Boolean(formData[fieldName])}>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleFileUpload(e, fieldName, folder)}
+          disabled={uploading[fieldName]}
+        />
+        {formData[fieldName] ? (
+          <img src={formData[fieldName]} alt="" className="preview" />
+        ) : (
+          <FaCloudUploadAlt />
+        )}
+        <strong>
+          {uploading[fieldName]
+            ? "Uploading…"
+            : formData[fieldName]
+              ? "Change image"
+              : "Click to upload"}
         </strong>
-      </div>
+        <span>{hint}</span>
+      </UploadZone>
+      {errors[fieldName] && <FieldError>{errors[fieldName]}</FieldError>}
+    </FieldGroup>
+  );
 
-      {/* Progress Bar & Form */}
-      <div className="main-content">
-        <div className="progress-bar">
-          <div className={`step ${step >= 1 ? "active" : ""}`}>
-            <span className="circle">1</span>
-            <span className="label">Login</span>
-          </div>
-          <div className={`step ${step >= 2 ? "active" : ""}`}>
-            <span className="circle">2</span>
-            <span className="label">Information</span>
-          </div>
-          <div className={`step ${step >= 3 ? "active" : ""}`}>
-            <span className="circle">3</span>
-            <span className="label">Image</span>
-          </div>
-          <div className={`step ${step === 4 ? "active" : ""}`}>
-            <span className="circle">4</span>
-            <span className="label">Address</span>
-          </div>
-        </div>
+  return (
+    <SignUpScreenWrap>
+      <BackgroundOrbs />
+      <SignUpLayout>
+        <SidePanel>
+          <BrandBlock>
+            <img src={logo} alt="Indigo Rhapsody" />
+            <h1>Join as a Designer</h1>
+            <p>
+              Create your account and start selling on Indigo Rhapsody — India&apos;s
+              curated fashion marketplace.
+            </p>
+          </BrandBlock>
 
-        <div className="form-container">
-          <form className="signup-form" onSubmit={handleSubmit}>
-            {/* Step 1 */}
-            {step === 1 && (
-              <div className="step-content">
-                <div className="input-group">
-                  <label>Display Name</label>
-                  <input
-                    type="text"
-                    name="displayName"
-                    placeholder="Your Display Name"
-                    value={formData.displayName}
-                    onChange={handleInputChange}
-                  />
-                  {errors.displayName && (
-                    <span className="error">{errors.displayName}</span>
-                  )}
-                </div>
-                <div className="input-group">
-                  <label>Phone Number</label>
-                  <input
-                    type="text"
-                    name="phoneNumber"
-                    placeholder="+91XXXXXXXXXX"
-                    maxLength={13}
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                  />
-                  {errors.phoneNumber && (
-                    <span className="error">{errors.phoneNumber}</span>
-                  )}
-                </div>
-              </div>
-            )}
+          <StepList>
+            {STEPS.map((s) => (
+              <StepItem
+                key={s.id}
+                $active={step === s.id}
+                $completed={step > s.id}
+              >
+                <StepCircle $active={step === s.id} $completed={step > s.id}>
+                  {step > s.id ? <FaCheck size={12} /> : s.id}
+                </StepCircle>
+                <StepMeta>
+                  <strong>{s.label}</strong>
+                  <span>{s.hint}</span>
+                </StepMeta>
+              </StepItem>
+            ))}
+          </StepList>
+        </SidePanel>
 
-            {/* Step 2 */}
-            {step === 2 && (
-              <div className="step-content">
-                <div className="input-group">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Your Email Address"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
-                    title="Please enter a valid email address" // Tooltip for invalid input
-                    required // Mark the field as required
-                  />
-                  {errors.email && (
-                    <span className="error">{errors.email}</span>
-                  )}
-                </div>
-                <div className="input-group">
-                  <label>Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Enter Password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required // Mark as required
-                  />
-                  {errors.password && (
-                    <span className="error">{errors.password}</span>
-                  )}
-                </div>
-              </div>
-            )}
-            {/* Step 3 */}
-            {/* Step 3 */}
-            {step === 3 && (
-              <div className="step-content">
-                <div className="input-group">
-                  <label>Short Description</label>
-                  <input
-                    type="text"
-                    name="shortDescription"
-                    placeholder="A short bio or tagline"
-                    value={formData.shortDescription}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="input-group">
-                  <label>About</label>
-                  <input
-                    type="text"
-                    name="about"
-                    placeholder="More details about you"
-                    value={formData.about}
-                    onChange={handleInputChange}
-                  />
-                </div>
+        <FormPanel>
+          <FormCard>
+            <StepHeader>
+              <h2>{currentStep.title}</h2>
+              <p>{currentStep.subtitle}</p>
+            </StepHeader>
 
-                <div className="input-group">
-                  <label>Logo</label>
-                  <input
-                    type="file"
-                    onChange={(e) => handleFileUpload(e, "logoUrl", "logos")}
-                  />
-                  {errors.logoUrl && (
-                    <span className="error">{errors.logoUrl}</span>
-                  )}
-                </div>
-
-                <div className="input-group">
-                  <label>Background</label>
-                  <input
-                    type="file"
-                    onChange={(e) =>
-                      handleFileUpload(e, "backgroundImageUrl", "backgrounds")
-                    }
-                  />
-                  {/* Added error display for Background */}
-                  {errors.backgroundImageUrl && (
-                    <span className="error">{errors.backgroundImageUrl}</span>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Step 4 */}
-            {step === 4 && (
-              <div className="step-content">
-                <div className="input-group">
-                  <label>Pin Code</label>
-                  <input
-                    type="text"
-                    name="pincode"
-                    placeholder="Enter your Pin Code"
-                    value={formData.pincode}
-                    onChange={handleInputChange}
-                  />
-                  {errors.pincode && (
-                    <span className="error">{errors.pincode}</span>
-                  )}
-                </div>
-                <div className="input-group">
-                  <label>Address Nickname</label>
-                  <input
-                    type="text"
-                    name="addressNickname"
-                    placeholder="e.g., Home, Office, etc."
-                    value={formData.addressNickname}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="input-group">
-                  <label>Street Details</label>
-                  <input
-                    type="text"
-                    name="address"
-                    placeholder="e.g., 123 Main Street"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                  />
-                  {errors.address && (
-                    <span className="error">{errors.address}</span>
-                  )}
-                </div>
-                <div className="input-group">
-                  <label>City</label>
-                  <input
-                    type="text"
-                    name="city"
-                    placeholder="Enter your City"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                  />
-                  {errors.city && <span className="error">{errors.city}</span>}
-                </div>
-                <div className="input-group">
-                  <label>State</label>
-                  <input
-                    type="text"
-                    name="state"
-                    placeholder="Enter your State"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                  />
-                  {errors.state && (
-                    <span className="error">{errors.state}</span>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Navigation Buttons */}
-            <div className="form-action">
-              {step < 4 && (
-                <button
-                  type="button"
-                  className="next-btn"
-                  onClick={handleNext}
-                  style={{ marginTop: "30px" }}
-                >
-                  Next
-                </button>
+            <form onSubmit={handleSubmit}>
+              {step === 1 && (
+                <FormGrid>
+                  <FieldGroup>
+                    <label htmlFor="displayName">Display name</label>
+                    <input
+                      id="displayName"
+                      type="text"
+                      name="displayName"
+                      placeholder="Your brand or studio name"
+                      value={formData.displayName}
+                      onChange={handleInputChange}
+                    />
+                    {errors.displayName && (
+                      <FieldError>{errors.displayName}</FieldError>
+                    )}
+                  </FieldGroup>
+                  <FieldGroup>
+                    <label htmlFor="phoneNumber">Phone number</label>
+                    <input
+                      id="phoneNumber"
+                      type="tel"
+                      name="phoneNumber"
+                      placeholder="+919876543210"
+                      maxLength={13}
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                    />
+                    {errors.phoneNumber && (
+                      <FieldError>{errors.phoneNumber}</FieldError>
+                    )}
+                  </FieldGroup>
+                </FormGrid>
               )}
+
+              {step === 2 && (
+                <FormGrid>
+                  <FieldGroup>
+                    <label htmlFor="email">Email address</label>
+                    <input
+                      id="email"
+                      type="email"
+                      name="email"
+                      placeholder="you@example.com"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      autoComplete="email"
+                    />
+                    {errors.email && <FieldError>{errors.email}</FieldError>}
+                  </FieldGroup>
+                  <FieldGroup>
+                    <label htmlFor="password">Password</label>
+                    <PasswordField>
+                      <input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        placeholder="At least 6 characters"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        autoComplete="new-password"
+                      />
+                      <span
+                        className="eye-icon"
+                        onClick={() => setShowPassword(!showPassword)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && setShowPassword(!showPassword)
+                        }
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </span>
+                    </PasswordField>
+                    {errors.password && (
+                      <FieldError>{errors.password}</FieldError>
+                    )}
+                  </FieldGroup>
+                </FormGrid>
+              )}
+
+              {step === 3 && (
+                <FormGrid>
+                  <FieldGroup>
+                    <label htmlFor="shortDescription">Short description</label>
+                    <input
+                      id="shortDescription"
+                      type="text"
+                      name="shortDescription"
+                      placeholder="A one-line tagline for your brand"
+                      value={formData.shortDescription}
+                      onChange={handleInputChange}
+                    />
+                  </FieldGroup>
+                  <FieldGroup>
+                    <label htmlFor="about">About you</label>
+                    <textarea
+                      id="about"
+                      name="about"
+                      placeholder="Tell shoppers about your design philosophy and collections"
+                      value={formData.about}
+                      onChange={handleInputChange}
+                    />
+                  </FieldGroup>
+                  {renderUpload(
+                    "logoUrl",
+                    "logos",
+                    "Brand logo",
+                    "Square image works best · PNG or JPG"
+                  )}
+                  {renderUpload(
+                    "backgroundImageUrl",
+                    "backgrounds",
+                    "Cover image",
+                    "Wide banner for your storefront · PNG or JPG"
+                  )}
+                </FormGrid>
+              )}
+
               {step === 4 && (
-                <button type="submit" className="submit-btn">
-                  Submit
-                </button>
+                <>
+                  <FormGrid $twoCol>
+                    <FieldGroup>
+                      <label htmlFor="pincode">Pin code</label>
+                      <input
+                        id="pincode"
+                        type="text"
+                        name="pincode"
+                        placeholder="6-digit PIN"
+                        maxLength={6}
+                        value={formData.pincode}
+                        onChange={handleInputChange}
+                      />
+                      {pincodeLoading && (
+                        <PincodeHint>Looking up city & state…</PincodeHint>
+                      )}
+                      {errors.pincode && (
+                        <FieldError>{errors.pincode}</FieldError>
+                      )}
+                    </FieldGroup>
+                    <FieldGroup>
+                      <label htmlFor="addressNickname">Address label</label>
+                      <input
+                        id="addressNickname"
+                        type="text"
+                        name="addressNickname"
+                        placeholder="Home, Studio, Warehouse…"
+                        value={formData.addressNickname}
+                        onChange={handleInputChange}
+                      />
+                    </FieldGroup>
+                  </FormGrid>
+                  <FormGrid>
+                    <FieldGroup>
+                      <label htmlFor="address">Street address</label>
+                      <input
+                        id="address"
+                        type="text"
+                        name="address"
+                        placeholder="Building, street, locality"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                      />
+                      {errors.address && (
+                        <FieldError>{errors.address}</FieldError>
+                      )}
+                    </FieldGroup>
+                  </FormGrid>
+                  <FormGrid $twoCol>
+                    <FieldGroup>
+                      <label htmlFor="city">City</label>
+                      <input
+                        id="city"
+                        type="text"
+                        name="city"
+                        placeholder="City"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        disabled={pincodeLoading}
+                      />
+                      {errors.city && <FieldError>{errors.city}</FieldError>}
+                    </FieldGroup>
+                    <FieldGroup>
+                      <label htmlFor="state">State</label>
+                      <input
+                        id="state"
+                        type="text"
+                        name="state"
+                        placeholder="State"
+                        value={formData.state}
+                        onChange={handleInputChange}
+                        disabled={pincodeLoading}
+                      />
+                      {errors.state && <FieldError>{errors.state}</FieldError>}
+                    </FieldGroup>
+                  </FormGrid>
+                </>
               )}
-            </div>
-          </form>
-        </div>
-      </div>
 
-      {/* Success Modal */}
+              <FormActions>
+                {step > 1 && (
+                  <SecondaryButton type="button" onClick={handleBack}>
+                    <FaArrowLeft />
+                    Back
+                  </SecondaryButton>
+                )}
+                {step < 4 ? (
+                  <PrimaryButton type="button" onClick={handleNext}>
+                    Continue
+                    <FaArrowRight />
+                  </PrimaryButton>
+                ) : (
+                  <PrimaryButton type="submit" disabled={submitting}>
+                    {submitting ? "Creating account…" : "Create account"}
+                  </PrimaryButton>
+                )}
+              </FormActions>
+            </form>
+
+            <LoginPrompt>
+              Already have an account? <Link to="/">Sign in</Link>
+            </LoginPrompt>
+          </FormCard>
+        </FormPanel>
+      </SignUpLayout>
+
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="success-icon">✔</div>
-            <h3>SUCCESS</h3>
-            <p>Congratulations, your account has been successfully created.</p>
-            <button onClick={handleContinue} className="modal-btn">
-              Continue
-            </button>
-          </div>
-        </div>
+        <ModalOverlay>
+          <ModalCard>
+            <div className="success-icon">
+              <FaCheck />
+            </div>
+            <h3>Welcome aboard!</h3>
+            <p>
+              Your designer account has been created. Sign in to access your
+              dashboard and start listing products.
+            </p>
+            <PrimaryButton type="button" onClick={handleContinue}>
+              Go to sign in
+            </PrimaryButton>
+          </ModalCard>
+        </ModalOverlay>
       )}
-    </div>
+    </SignUpScreenWrap>
   );
 }
 
