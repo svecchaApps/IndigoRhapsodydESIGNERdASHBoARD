@@ -8,7 +8,6 @@ The application now uses JWT tokens stored in HTTP-only cookies instead of local
 
 ## Key Components
 
-### 1. Cookie Service (`src/service/cookieService.js`)
 
 Handles all cookie operations for JWT tokens:
 
